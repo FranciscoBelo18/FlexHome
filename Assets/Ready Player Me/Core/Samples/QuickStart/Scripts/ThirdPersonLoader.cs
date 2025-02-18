@@ -6,7 +6,7 @@ namespace ReadyPlayerMe.Samples.QuickStart
 {
     public class ThirdPersonLoader : MonoBehaviour
     {
-        private readonly Vector3 avatarPositionOffset = new Vector3(0, -0.08f, 0);
+        private readonly Vector3 avatarPositionOffset = new Vector3(0, 0, 0);
         
         [SerializeField][Tooltip("RPM avatar URL or shortcode to load")] 
         private string avatarUrl;
