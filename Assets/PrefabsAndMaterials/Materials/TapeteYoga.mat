@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Palette 2
+  m_Name: TapeteYoga
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_Parent: {fileID: 2100000, guid: 146e5298a8aad684ea84e21fce401c51, type: 2}
+  m_Parent: {fileID: 2100000, guid: 358d6d494c6f1924d80a487bb7161743, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -22,13 +22,12 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 7828ad4611422b64b8a45fa6941d6804, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
-    m_Colors: []
+    m_Floats:
+    - _Glossiness: 0
+    - _Metallic: 0.19
+    m_Colors:
+    - _Color: {r: 0.24528301, g: 0.21959771, b: 0.19391242, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
