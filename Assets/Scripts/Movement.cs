@@ -11,6 +11,8 @@ public class Movement : MonoBehaviour
     public string[] MachinesTags;
     private List<GameObject> GymMachines = new List<GameObject>();
     private GameObject DesiredMachine = null;
+    private Vector3 PositionToSpawn;
+    private Animator animator;
 
 
     void Start()
@@ -26,6 +28,7 @@ public class Movement : MonoBehaviour
         {
             Debug.Log(GymMachines[i].tag);
         }
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -44,10 +47,17 @@ public class Movement : MonoBehaviour
     {
         if(collision.gameObject == DesiredMachine)
         {
+            animator.SetBool("ReachedDestination", true);
             switch (DesiredMachine.tag)
             { 
                 case "Treadmill":
                     Debug.Log("Treadmill");
+                    Debug.Log("1) " + DesiredMachine.name); 
+
+                    Debug.Log("2) " + DesiredMachine.transform.GetChild(0).name + " " + DesiredMachine.transform.GetChild(1).name);
+
+                    //Debug.Log("2) " + DesiredMachine.transform.Find("Spawner").gameObject.transform.position);
+                    //PositionToSpawn = DesiredMachine.transform.Find("Spawner").gameObject.transform.position;
                     
                     agent.ResetPath();
                     agent.isStopped = true;
