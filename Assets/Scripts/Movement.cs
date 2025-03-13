@@ -14,8 +14,8 @@ public class Movement : MonoBehaviour
     private Vector3 PositionToSpawn;
     private Animator animator;
     public GameObject teste;
-
     private Vector3 initialPosition;
+    private int ChildInt;
 
 
     void Start()
@@ -47,6 +47,7 @@ public class Movement : MonoBehaviour
             DesiredMachine = GymMachines[ObjectToGo];
             
         }*/
+
     }
 
     private void MakeDestination()
@@ -55,6 +56,18 @@ public class Movement : MonoBehaviour
         Debug.Log("int random: " + ObjectToGo);
         agent.SetDestination(GymMachines[ObjectToGo].transform.position);
         DesiredMachine = GymMachines[ObjectToGo];
+        GetChildInt(DesiredMachine);
+    }
+
+    private void GetChildInt(GameObject parent)
+    {
+        for(int i = 0; i < parent.transform.childCount; i++)
+        {
+            if (parent.transform.GetChild(i).name == "Spawner")
+            {
+                ChildInt = i;
+            }
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -65,63 +78,54 @@ public class Movement : MonoBehaviour
             switch (DesiredMachine.tag)
             { 
                 case "Treadmill":
-                    //agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
                     agent.enabled = false;
+                    DesiredMachine.GetComponent<Collider>().enabled = false;
                     Debug.Log("Treadmill");
                     Debug.Log("1) " + DesiredMachine.name); 
-
-                    Debug.Log("2) " + DesiredMachine.transform.GetChild(0).name + " " + DesiredMachine.transform.GetChild(1).name);
-
-                    //Debug.Log("2) " + DesiredMachine.transform.Find("Spawner").gameObject.transform.position);
-                    //PositionToSpawn = DesiredMachine.transform.Find("Spawner").gameObject.transform.position;
-
-
-
-                    //Debug.Log("3) " + teste.transform.position);
                     
-                    //transform.position = initialPosition;
+                    transform.position = DesiredMachine.transform.GetChild(ChildInt).position;
+                    transform.rotation = Quaternion.Euler(0, 0, 0);
+                    Debug.Log("Posicao do NPC: " + transform.position);
+                    Debug.Log("Posicao do Spawner: " + DesiredMachine.transform.GetChild(ChildInt).position);
+
                     
                     break;
                 case "Bike":
-                    //agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
                     Debug.Log("Bike");
-                    //transform.position = teste.transform.position;
-                    //transform.position = initialPosition;
+                    Debug.Log("1) " + DesiredMachine.name);
+
                     break;
                 case "BackMachine":
-                    //agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
                     Debug.Log("BackMachine");
-                    //transform.position = initialPosition;
-                    //transform.position = teste.transform.position;
+                    Debug.Log("1) " + DesiredMachine.name);
+
                     break;
                 case "BackMachine2":
-                    //agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
                     Debug.Log("BackMachine2");
-                    //transform.position = initialPosition;
-                    //transform.position = teste.transform.position;
+                    Debug.Log("1) " + DesiredMachine.name);
+
                     break;
                 case "StationaryRowing":
-                    //agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
                     Debug.Log("StationaryRowing");
-                    //transform.position = initialPosition;
-                    //transform.position = teste.transform.position;
+                    Debug.Log("1) " + DesiredMachine.name);
+
                     break;
             }
         }
     }
-}
+}    
