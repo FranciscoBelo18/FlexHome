@@ -5,18 +5,14 @@ using System.Collections.Generic;
 
 public class Movement : MonoBehaviour
 {
-    private NavMeshAgent agent = null;
+    private NavMeshAgent agent;
     private GameObject[] MachinesAvailables;
     private int ObjectToGo;
     public string[] MachinesTags;
     private List<GameObject> GymMachines = new List<GameObject>();
     private GameObject DesiredMachine = null;
-    private Vector3 PositionToSpawn;
     private Animator animator;
-    public GameObject teste;
-    private Vector3 initialPosition;
     private int ChildInt;
-
 
     void Start()
     {
@@ -32,34 +28,45 @@ public class Movement : MonoBehaviour
             Debug.Log(GymMachines[i].tag);
         }
         animator = GetComponent<Animator>();
-        initialPosition = transform.position;
-        Debug.Log("Pos inicil do NPC: " + initialPosition);
         MakeDestination();
     }
 
     void Update()
     {
-        /*if(agent.hasPath == false && agent.isStopped == false)
-        {
-            ObjectToGo = Random.Range(0, GymMachines.Count);
-            Debug.Log("int random: " + ObjectToGo);
-            agent.SetDestination(GymMachines[ObjectToGo].transform.position);
-            DesiredMachine = GymMachines[ObjectToGo];
-            
-        }*/
 
     }
+
 
     private void MakeDestination()
     {
         ObjectToGo = Random.Range(0, GymMachines.Count);
         Debug.Log("int random: " + ObjectToGo);
-        agent.SetDestination(GymMachines[ObjectToGo].transform.position);
-        DesiredMachine = GymMachines[ObjectToGo];
-        GetChildInt(DesiredMachine);
+        if(VerifySpawnerState(GymMachines[ObjectToGo]))
+        {
+            agent.SetDestination(GymMachines[ObjectToGo].transform.position);
+            DesiredMachine = GymMachines[ObjectToGo];
+            GetChildIntSpawner(DesiredMachine);
+        }
+        else
+        {
+            MakeDestination();
+        }
+    }
+    
+    private bool VerifySpawnerState(GameObject machine)
+    {
+        for(int i = 0; i < machine.transform.childCount; i++)
+        {
+            if(machine.transform.GetChild(i).name == "Spawner")
+            {
+                Debug.Log("Spawner: " + machine.transform.GetChild(i).gameObject.activeSelf);
+                return machine.transform.GetChild(i).gameObject.activeSelf;
+            }
+        }
+        return true;
     }
 
-    private void GetChildInt(GameObject parent)
+    private void GetChildIntSpawner(GameObject parent)
     {
         for(int i = 0; i < parent.transform.childCount; i++)
         {
@@ -74,10 +81,10 @@ public class Movement : MonoBehaviour
     {
         if(collision.gameObject == DesiredMachine)
         {
-            animator.SetBool("ReachedDestination", true);
             switch (DesiredMachine.tag)
             { 
                 case "Treadmill":
+                    animator.SetBool("ReachedDestination", true);
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
@@ -94,6 +101,7 @@ public class Movement : MonoBehaviour
                     
                     break;
                 case "Bike":
+                    animator.SetBool("ReachedDestination", true);
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
@@ -102,6 +110,7 @@ public class Movement : MonoBehaviour
 
                     break;
                 case "BackMachine":
+                    animator.SetBool("ReachedDestination", true);
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
@@ -110,6 +119,7 @@ public class Movement : MonoBehaviour
 
                     break;
                 case "BackMachine2":
+                    animator.SetBool("ReachedDestination", true);
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
@@ -118,6 +128,7 @@ public class Movement : MonoBehaviour
 
                     break;
                 case "StationaryRowing":
+                    animator.SetBool("ReachedDestination", true);
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
                     agent.acceleration = 0;
