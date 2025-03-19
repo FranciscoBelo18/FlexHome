@@ -20,7 +20,7 @@ namespace Mediapipe.Unity
     protected override void Start()
     {
       base.Start();
-      transform.localPosition = new Vector3(0, _hipHeightMeter * _scale.y, 0);
+      //transform.localPosition = new Vector3(0, _hipHeightMeter * _scale.y, 0);
     }
 
     public void DrawNow(IReadOnlyList<Landmark> target)
