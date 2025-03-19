@@ -7,6 +7,11 @@ TagManager:
   - MBS:Floor
   - Global Resource
   - MBS:Wall
+  - Bike
+  - Treadmill
+  - BackMachine
+  - BackMachine2
+  - StationaryRowing
   layers:
   - Default
   - TransparentFX
