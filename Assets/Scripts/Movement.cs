@@ -13,6 +13,7 @@ public class Movement : MonoBehaviour
     private GameObject DesiredMachine = null;
     private Animator animator;
     private int ChildInt;
+    private int TriggerBox;
 
     void Start()
     {
@@ -42,10 +43,11 @@ public class Movement : MonoBehaviour
         ObjectToGo = Random.Range(0, GymMachines.Count);
         Debug.Log("int random: " + ObjectToGo);
         if(VerifySpawnerState(GymMachines[ObjectToGo]))
-        {
-            agent.SetDestination(GymMachines[ObjectToGo].transform.position);
+        {   
             DesiredMachine = GymMachines[ObjectToGo];
-            GetChildIntSpawner(DesiredMachine);
+            Debug.Log("Maquina escolhida: " + DesiredMachine.name);
+            GetChildInt(DesiredMachine);
+            agent.SetDestination(DesiredMachine.transform.GetChild(TriggerBox).gameObject.transform.position);
         }
         else
         {
@@ -66,7 +68,7 @@ public class Movement : MonoBehaviour
         return true;
     }
 
-    private void GetChildIntSpawner(GameObject parent)
+    private void GetChildInt(GameObject parent)
     {
         for(int i = 0; i < parent.transform.childCount; i++)
         {
@@ -74,12 +76,16 @@ public class Movement : MonoBehaviour
             {
                 ChildInt = i;
             }
+            else if (parent.transform.GetChild(i).name == "InvisibleBox")
+            {
+                TriggerBox = i;
+            }
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject == DesiredMachine)
+        if(collision.gameObject == DesiredMachine.transform.GetChild(TriggerBox).gameObject)
         {
             switch (DesiredMachine.tag)
             { 
