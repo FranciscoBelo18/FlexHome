@@ -29,6 +29,17 @@ public class Movement : MonoBehaviour
             Debug.Log(GymMachines[i].tag);
         }
         animator = GetComponent<Animator>();
+        foreach (GameObject machine in GymMachines)
+        {
+            //se tiver um box collider, desativa
+            for(int i = 0; i < machine.transform.childCount; i++)
+            {
+                if(machine.transform.GetChild(i).name == "InvisibleBox")
+                {
+                    machine.transform.GetChild(i).GetComponent<Collider>().enabled = false;
+                }
+            }
+        }
         MakeDestination();
     }
 
@@ -45,9 +56,16 @@ public class Movement : MonoBehaviour
         if(VerifySpawnerState(GymMachines[ObjectToGo]))
         {   
             DesiredMachine = GymMachines[ObjectToGo];
-            Debug.Log("Maquina escolhida: " + DesiredMachine.name);
             GetChildInt(DesiredMachine);
+
+            if(DesiredMachine.transform.GetChild(TriggerBox).name == "InvisibleBox")
+            {
+                DesiredMachine.transform.GetChild(TriggerBox).GetComponent<Collider>().enabled = true;
+            }
+            Debug.Log("Maquina escolhida: " + DesiredMachine.name);
+            
             agent.SetDestination(DesiredMachine.transform.GetChild(TriggerBox).gameObject.transform.position);
+            
         }
         else
         {
