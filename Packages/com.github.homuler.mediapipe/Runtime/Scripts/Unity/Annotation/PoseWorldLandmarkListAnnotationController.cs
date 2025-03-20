@@ -11,7 +11,7 @@ namespace Mediapipe.Unity
 {
   public class PoseWorldLandmarkListAnnotationController : AnnotationController<PoseLandmarkListAnnotation>
   {
-    [SerializeField] private float _hipHeightMeter = 0.9f;
+    //[SerializeField] private float _hipHeightMeter = 0.9f;
     [SerializeField] private Vector3 _scale = new Vector3(100, 100, 100);
     [SerializeField] private bool _visualizeZ = true;
 
