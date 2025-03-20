@@ -63589,7 +63589,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   annotation: {fileID: 1737185255}
-  _hipHeightMeter: 0.9
   _scale: {x: 2, y: 2, z: 2}
   _visualizeZ: 0
 --- !u!1 &1947791663
@@ -69710,7 +69709,7 @@ PrefabInstance:
     - target: {fileID: 8571076842583978917, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 867.7075
+      value: 869.80005
       objectReference: {fileID: 0}
     - target: {fileID: 8571076842583978917, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
@@ -69740,7 +69739,7 @@ PrefabInstance:
     - target: {fileID: 8571076843237194836, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -190.40245
+      value: -190.40247
       objectReference: {fileID: 0}
     - target: {fileID: 8571076843237194837, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
