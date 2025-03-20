@@ -210,22 +210,22 @@ namespace Mediapipe.Unity
 
     public void Draw(IReadOnlyList<NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
     }
 
     public void Draw(NormalizedLandmarkList target, bool visualizeZ = false)
     {
-      Draw(target?.Landmark, BodyParts.All, visualizeZ);
+      Draw(target?.Landmark, BodyParts.All & ~BodyParts.Face, visualizeZ);
     }
 
     public void Draw(IReadOnlyList<mptcc.NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
     }
 
     public void Draw(mptcc.NormalizedLandmarks target, bool visualizeZ = false)
     {
-      Draw(target.landmarks, BodyParts.All, visualizeZ);
+      Draw(target.landmarks, BodyParts.All & ~BodyParts.Face, visualizeZ);
     }
 
     private void ApplyLeftLandmarkColor(Color color)
@@ -258,14 +258,13 @@ namespace Mediapipe.Unity
       {
         return;
       }
-
+      // Desativar os pontos da face (0 a 10) se a máscara não incluir "Face"
       if (!mask.HasFlag(BodyParts.Face))
       {
-        // deactivate face landmarks
-        for (var i = 0; i <= 10; i++)
-        {
-          _landmarkListAnnotation[i].SetActive(false);
-        }
+          for (var i = 0; i <= 10; i++) // Índices de 0 a 10 correspondem à face
+          {
+              _landmarkListAnnotation[i].SetActive(false);
+          }
       }
       if (!mask.HasFlag(BodyParts.LeftArm))
       {
