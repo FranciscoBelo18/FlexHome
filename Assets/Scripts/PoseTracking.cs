@@ -6,6 +6,9 @@ public class PoseTracking : MonoBehaviour
 {
     public UDPReceive udpReceive;
     public GameObject[] PosePoints;
+    public GameObject PoseParent;
+    public GameObject SpawnPose;
+    private bool changed = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -29,12 +32,16 @@ public class PoseTracking : MonoBehaviour
             float y = float.Parse(points[i * 3 + 1])/80-5;
             float z = float.Parse(points[i * 3 + 2])/80;*/
 
-            float x = 7 - float.Parse(points[i * 3]) / 100;
-            float y = float.Parse(points[i * 3 + 1]) /100;
-            float z = float.Parse(points[i * 3 + 2]) / 100;
+            float x = 7 - float.Parse(points[i * 3]) / 1000;
+            float y = float.Parse(points[i * 3 + 1]) / 1000;
+            float z = float.Parse(points[i * 3 + 2]) / 1000;
 
             PosePoints[i].transform.localPosition = new Vector3(x, y, z);
         }
-
+        if (!changed)
+        {
+            PoseParent.transform.position = SpawnPose.transform.position;
+            changed = true;
+        }
     }
 }

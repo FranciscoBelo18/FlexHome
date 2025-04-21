@@ -43,4 +43,18 @@ public class UDPReceive : MonoBehaviour
             }
         }
     }
+
+    void OnApplicationQuit()
+{
+    startReceiving = false;
+    if (client != null)
+    {
+        client.Close();
+    }
+    if (receiveThread != null && receiveThread.IsAlive)
+    {
+        receiveThread.Abort();
+    }
+}
+
 }

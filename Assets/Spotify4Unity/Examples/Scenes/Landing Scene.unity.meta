@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1bf1d74e89608c4469d0345531e74a3a
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 129028
+  packageName: S4U - Automatic Spotify Integration
+  packageVersion: 2.0.1
+  assetPath: Assets/Spotify4Unity/Examples/Scenes/Landing Scene.unity
+  uploadId: 446514
