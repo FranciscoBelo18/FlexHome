@@ -15,6 +15,10 @@ namespace Mediapipe.Unity
 
     private ImageSource _imageSource;
 
+    // Variáveis para monitorar mudanças na resolução da tela
+    private int _lastScreenWidth;
+    private int _lastScreenHeight;
+
     public Texture texture
     {
       get => _screen.texture;
@@ -34,10 +38,44 @@ namespace Mediapipe.Unity
       Rotate(_imageSource.rotation.Reverse());
       ResetUvRect(RunningMode.Async);
       texture = imageSource.GetCurrentTexture();
+
+      // Salva o estado atual da tela para comparar em Update()
+      _lastScreenWidth = UnityEngine.Screen.width;
+      _lastScreenHeight = UnityEngine.Screen.height;
     }
 
-    public void Resize(int width, int height)
+    public void Resize(int textureWidth, int textureHeight)
     {
+      var canvas = _screen.canvas;
+
+      if (canvas == null)
+      {
+        Debug.LogWarning("Canvas not found for RawImage. Using fixed size.");
+        _screen.rectTransform.sizeDelta = new Vector2(textureWidth, textureHeight);
+        return;
+      }
+
+      // Utiliza o nome completo para evitar conflito com o nome da classe (Screen)
+      var screenWidth = UnityEngine.Screen.width;
+      var screenHeight = UnityEngine.Screen.height;
+      float screenAspect = (float)screenWidth / screenHeight;
+      float textureAspect = (float)textureWidth / textureHeight;
+
+      float width, height;
+
+      if (textureAspect > screenAspect)
+      {
+        // A textura é mais larga que a tela, ajusta para preencher a largura
+        width = screenWidth;
+        height = screenWidth / textureAspect;
+      }
+      else
+      {
+        // A textura é mais alta que a tela, ajusta para preencher a altura
+        height = screenHeight;
+        width = screenHeight * textureAspect;
+      }
+
       _screen.rectTransform.sizeDelta = new Vector2(width, height);
     }
 
@@ -62,14 +100,14 @@ namespace Mediapipe.Unity
 
       if (_imageSource.isVerticallyFlipped && runningMode == RunningMode.Async)
       {
-        // In Async mode, we don't need to flip the screen vertically since the image will be copied on CPU.
+        // No modo Async, não é necessário flipar verticalmente, pois a imagem será copiada na CPU.
         rect = FlipVertically(rect);
       }
 
       if (_imageSource.isFrontFacing)
       {
-        // Flip the image (not the screen) horizontally.
-        // It should be taken into account that the image will be rotated later.
+        // Flip na imagem (não na tela) horizontalmente.
+        // Leva em consideração que a imagem será rotacionada posteriormente.
         var rotation = _imageSource.rotation;
 
         if (rotation == RotationAngle.Rotation0 || rotation == RotationAngle.Rotation180)
@@ -93,6 +131,17 @@ namespace Mediapipe.Unity
     private UnityEngine.Rect FlipVertically(UnityEngine.Rect rect)
     {
       return new UnityEngine.Rect(rect.x, 1 - rect.y, rect.width, -rect.height);
+    }
+
+    // Monitoramento em tempo real para detectar mudanças na resolução/rotação da tela
+    private void Update()
+    {
+      if (UnityEngine.Screen.width != _lastScreenWidth || UnityEngine.Screen.height != _lastScreenHeight)
+      {
+        _lastScreenWidth = UnityEngine.Screen.width;
+        _lastScreenHeight = UnityEngine.Screen.height;
+        Resize(_imageSource.textureWidth, _imageSource.textureHeight);
+      }
     }
   }
 }
