@@ -8,14 +8,14 @@ public class ReadStretchingFile : MonoBehaviour
 
     void Start()
     {
-        SortedDictionary<int, int> result = ReadFile("Squats");
+        /*SortedDictionary<int, int> result = ReadFile("Squats");
         foreach (KeyValuePair<int, int> kvp in result)
         {
             Debug.Log("Joint: " + kvp.Key + ", Angle: " + kvp.Value);
-        }
+        }*/
     }
 
-    SortedDictionary<int, int> ReadFile(string ExerciseName)
+    public SortedDictionary<int, int> ReadFile(string ExerciseName)
     {
         SortedDictionary<int, int> JointAnglePair = new SortedDictionary<int, int>();
 
@@ -31,7 +31,7 @@ public class ReadStretchingFile : MonoBehaviour
                     Debug.Log("Só dos squats -> " + ExerciseValues);
                     string[] values = ExerciseValues.Split(' ');
                     foreach (string value in values) {
-                        Debug.Log("Valor: " + value);
+                        //Debug.Log("Valor: " + value);
                         string Angle = value.Substring(value.IndexOf('_') + 1);
                         string Joint = value.Substring(0, value.IndexOf('_'));
                         
