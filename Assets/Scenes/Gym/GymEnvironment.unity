@@ -1034,7 +1034,7 @@ GameObject:
   - component: {fileID: 23367235}
   - component: {fileID: 23367234}
   m_Layer: 0
-  m_Name: Point (0)
+  m_Name: Point 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2500,7 +2500,7 @@ GameObject:
   - component: {fileID: 51803474}
   - component: {fileID: 51803473}
   m_Layer: 0
-  m_Name: Point (1)
+  m_Name: Point 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4240,7 +4240,7 @@ GameObject:
   - component: {fileID: 107199335}
   - component: {fileID: 107199334}
   m_Layer: 0
-  m_Name: Point (25)
+  m_Name: Point 25
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4874,7 +4874,7 @@ GameObject:
   - component: {fileID: 138309007}
   - component: {fileID: 138309006}
   m_Layer: 0
-  m_Name: Point (14)
+  m_Name: Point 14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10773,7 +10773,7 @@ GameObject:
   - component: {fileID: 280077054}
   - component: {fileID: 280077053}
   m_Layer: 0
-  m_Name: Point (23)
+  m_Name: Point 23
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11286,7 +11286,7 @@ GameObject:
   - component: {fileID: 299831251}
   - component: {fileID: 299831250}
   m_Layer: 0
-  m_Name: Point (8)
+  m_Name: Point 8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11394,7 +11394,7 @@ GameObject:
   - component: {fileID: 308746216}
   - component: {fileID: 308746215}
   m_Layer: 0
-  m_Name: Point (5)
+  m_Name: Point 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19114,7 +19114,7 @@ GameObject:
   - component: {fileID: 511122581}
   - component: {fileID: 511122580}
   m_Layer: 0
-  m_Name: Point (3)
+  m_Name: Point 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20119,7 +20119,7 @@ GameObject:
   - component: {fileID: 537064668}
   - component: {fileID: 537064667}
   m_Layer: 0
-  m_Name: Point (6)
+  m_Name: Point 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21433,7 +21433,7 @@ GameObject:
   - component: {fileID: 572644178}
   - component: {fileID: 572644177}
   m_Layer: 0
-  m_Name: Point (31)
+  m_Name: Point 31
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21740,7 +21740,7 @@ GameObject:
   - component: {fileID: 579551452}
   - component: {fileID: 579551451}
   m_Layer: 0
-  m_Name: Point (20)
+  m_Name: Point 20
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21999,7 +21999,7 @@ GameObject:
   - component: {fileID: 581052178}
   - component: {fileID: 581052177}
   m_Layer: 0
-  m_Name: Point (26)
+  m_Name: Point 26
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22277,7 +22277,7 @@ GameObject:
   - component: {fileID: 588801472}
   - component: {fileID: 588801471}
   m_Layer: 0
-  m_Name: Point (22)
+  m_Name: Point 22
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25586,6 +25586,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 668041587}
+  - component: {fileID: 668041588}
+  - component: {fileID: 668041589}
   m_Layer: 0
   m_Name: Points
   m_TagString: Untagged
@@ -25641,6 +25643,30 @@ Transform:
   - {fileID: 871597393}
   m_Father: {fileID: 1939622907}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &668041588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 668041586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63234d8217db72042bfc9f11ee5b7c42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &668041589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 668041586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f56bd4ca8b5a4b34f8108e1bfff110cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &672300583 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5459460548523263015, guid: a4d3c5447ed2edf4e983f3f38c2405df,
@@ -25975,7 +26001,7 @@ GameObject:
   - component: {fileID: 676544671}
   - component: {fileID: 676544670}
   m_Layer: 0
-  m_Name: Point (9)
+  m_Name: Point 9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26627,7 +26653,7 @@ GameObject:
   - component: {fileID: 694458300}
   - component: {fileID: 694458299}
   m_Layer: 0
-  m_Name: Point (2)
+  m_Name: Point 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29846,7 +29872,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!81 &764333906
 AudioListener:
   m_ObjectHideFlags: 0
@@ -30785,7 +30811,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &797261490
 Transform:
   m_ObjectHideFlags: 0
@@ -34316,7 +34342,7 @@ GameObject:
   - component: {fileID: 871597395}
   - component: {fileID: 871597394}
   m_Layer: 0
-  m_Name: Point (32)
+  m_Name: Point 32
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37131,7 +37157,7 @@ GameObject:
   - component: {fileID: 943407652}
   - component: {fileID: 943407651}
   m_Layer: 0
-  m_Name: Point (21)
+  m_Name: Point 21
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38539,7 +38565,7 @@ GameObject:
   - component: {fileID: 969416691}
   - component: {fileID: 969416690}
   m_Layer: 0
-  m_Name: Point (11)
+  m_Name: Point 11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39951,7 +39977,7 @@ GameObject:
   - component: {fileID: 1003765699}
   - component: {fileID: 1003765698}
   m_Layer: 0
-  m_Name: Point (24)
+  m_Name: Point 24
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40272,6 +40298,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Annotatable Screen
+      objectReference: {fileID: 0}
+    - target: {fileID: 3259285889726014655, guid: 5713b959e3c77a58fb258133fc8e4aef,
+        type: 3}
+      propertyPath: _fitMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3259285889726014655, guid: 5713b959e3c77a58fb258133fc8e4aef,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -41310,7 +41346,7 @@ GameObject:
   - component: {fileID: 1026382923}
   - component: {fileID: 1026382922}
   m_Layer: 0
-  m_Name: Point (17)
+  m_Name: Point 17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42760,7 +42796,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1057993248
 Transform:
   m_ObjectHideFlags: 0
@@ -43056,7 +43092,7 @@ GameObject:
   - component: {fileID: 1068537868}
   - component: {fileID: 1068537867}
   m_Layer: 0
-  m_Name: Point (19)
+  m_Name: Point 19
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44676,7 +44712,7 @@ GameObject:
   - component: {fileID: 1113671499}
   - component: {fileID: 1113671498}
   m_Layer: 0
-  m_Name: Point (10)
+  m_Name: Point 10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46554,7 +46590,7 @@ GameObject:
   - component: {fileID: 1171807935}
   - component: {fileID: 1171807934}
   m_Layer: 0
-  m_Name: Point (16)
+  m_Name: Point 16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -57323,7 +57359,7 @@ GameObject:
   - component: {fileID: 1417490169}
   - component: {fileID: 1417490168}
   m_Layer: 0
-  m_Name: Point (28)
+  m_Name: Point 28
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59819,7 +59855,7 @@ GameObject:
   - component: {fileID: 1477191468}
   - component: {fileID: 1477191467}
   m_Layer: 0
-  m_Name: Point (12)
+  m_Name: Point 12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65285,7 +65321,7 @@ GameObject:
   - component: {fileID: 1600468946}
   - component: {fileID: 1600468945}
   m_Layer: 0
-  m_Name: Point (18)
+  m_Name: Point 18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65501,7 +65537,7 @@ GameObject:
   - component: {fileID: 1604763618}
   - component: {fileID: 1604763617}
   m_Layer: 0
-  m_Name: Point (13)
+  m_Name: Point 13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70683,7 +70719,7 @@ GameObject:
   - component: {fileID: 1747340940}
   - component: {fileID: 1747340939}
   m_Layer: 0
-  m_Name: Point (30)
+  m_Name: Point 30
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70931,7 +70967,7 @@ GameObject:
   - component: {fileID: 1754375559}
   - component: {fileID: 1754375558}
   m_Layer: 0
-  m_Name: Point (7)
+  m_Name: Point 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81777,7 +81813,7 @@ GameObject:
   - component: {fileID: 2024438936}
   - component: {fileID: 2024438935}
   m_Layer: 0
-  m_Name: Point (27)
+  m_Name: Point 27
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -82692,7 +82728,7 @@ GameObject:
   - component: {fileID: 2064379333}
   - component: {fileID: 2064379332}
   m_Layer: 0
-  m_Name: Point (29)
+  m_Name: Point 29
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -82800,7 +82836,7 @@ GameObject:
   - component: {fileID: 2066689017}
   - component: {fileID: 2066689016}
   m_Layer: 0
-  m_Name: Point (4)
+  m_Name: Point 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -86050,7 +86086,7 @@ GameObject:
   - component: {fileID: 2123626209}
   - component: {fileID: 2123626208}
   m_Layer: 0
-  m_Name: Point (15)
+  m_Name: Point 15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -86621,12 +86657,12 @@ PrefabInstance:
     - target: {fileID: 5158692485022354238, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485022354238, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485022354238, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
@@ -86641,22 +86677,22 @@ PrefabInstance:
     - target: {fileID: 5158692485022354238, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 457.75
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485022354238, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 1.0999985
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485785395896, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485785395896, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485785395896, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
@@ -86671,12 +86707,12 @@ PrefabInstance:
     - target: {fileID: 5158692485785395896, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 309.75
       objectReference: {fileID: 0}
     - target: {fileID: 5158692485785395896, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 1.0999985
       objectReference: {fileID: 0}
     - target: {fileID: 8571076842338426121, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
@@ -86958,12 +86994,12 @@ PrefabInstance:
     - target: {fileID: 8571076844286272849, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8571076844286272849, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8571076844286272849, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
@@ -86978,12 +87014,12 @@ PrefabInstance:
     - target: {fileID: 8571076844286272849, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 619.49976
       objectReference: {fileID: 0}
     - target: {fileID: 8571076844286272849, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 4.25
       objectReference: {fileID: 0}
     - target: {fileID: 8571076844286272851, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
