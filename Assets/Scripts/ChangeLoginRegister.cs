@@ -4,7 +4,6 @@ public class ChangeLoginRegister : MonoBehaviour
 {
     public GameObject loginPanel;
     public GameObject registerPanel;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     
     public void ActivateLoginPanel()
     {
