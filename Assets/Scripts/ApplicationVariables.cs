@@ -3,4 +3,6 @@
 public static class ApplicationVariables
 {
     public static string SceneToLoad = "";
+
+    public static string userLoggedID = "";
 }
