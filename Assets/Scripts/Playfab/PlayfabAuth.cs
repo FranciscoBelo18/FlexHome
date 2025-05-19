@@ -4,8 +4,9 @@ using PlayFab;
 using PlayFab.ClientModels;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.SceneManagement;
 
-public class PlayfabManager : MonoBehaviour
+public class PlayfabAuth : MonoBehaviour
 {
 
     public TMP_InputField usernameRegister;
@@ -48,6 +49,9 @@ public class PlayfabManager : MonoBehaviour
     private void OnRegisterSuccess(RegisterPlayFabUserResult result)
     {
         Debug.Log("Registration successful: " + result.PlayFabId);
+        ApplicationVariables.userLoggedID = result.PlayFabId;
+        ApplicationVariables.SceneToLoad = "MainMenu";
+        SceneManager.LoadScene("LoadingScene");
     }
 
     private void OnRegisterError(PlayFabError error)
@@ -78,10 +82,16 @@ public class PlayfabManager : MonoBehaviour
     private void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Login successful: " + result.PlayFabId);
+        ApplicationVariables.userLoggedID = result.PlayFabId;
+        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
+        ApplicationVariables.SceneToLoad = "MainMenu";
+        SceneManager.LoadScene("LoadingScene");
     }
 
     private void OnLoginError(PlayFabError error)
     {
         Debug.Log("Login failed: " + error.GenerateErrorReport());
     }
+    
+
 }

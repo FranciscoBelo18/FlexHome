@@ -5,4 +5,6 @@ public static class ApplicationVariables
     public static string SceneToLoad = "";
 
     public static string userLoggedID = "";
+
+    public static string userLoggedName = "";
 }
