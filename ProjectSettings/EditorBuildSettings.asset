@@ -33,7 +33,19 @@ EditorBuildSettings:
     path: Assets/MediaPipeUnity/Samples/Scenes/Legacy/MediaPipe Video/MediaPipe Video.unity
     guid: 16062faf4cda54140b781b925351b119
   - enabled: 1
-    path: Assets/Scenes/Gym/GymEnvironment.unity
+    path: Assets/Scenes/Gym/GymScene.unity
     guid: 82ffac477ce64fd46a57d2d423d0a5f6
+  - enabled: 1
+    path: Assets/Scenes/Gym/MainMenu.unity
+    guid: ca33619ee182bf24485de072b9660faf
+  - enabled: 1
+    path: Assets/Scenes/Gym/LoadingScene.unity
+    guid: ca55f3131a03df14fa5114ae5a58e7d5
+  - enabled: 1
+    path: Assets/Scenes/Gym/ProfileScene.unity
+    guid: 3d437b2b97a9e7c42a58251637df17d0
+  - enabled: 1
+    path: Assets/Scenes/Gym/SelectVersionScene.unity
+    guid: 0aa925fbc9e082e4fb2728a9490db8ae
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
