@@ -14,7 +14,7 @@ public class ButtonsLogic : MonoBehaviour
     public void Profile()
     {
         ApplicationVariables.SceneToLoad = "ProfileScene";
-        SceneManager.LoadScene("LoadingScene"); 
+        SceneManager.LoadScene("LoadingScene");
     }
 
     public void QuitGame()
@@ -39,4 +39,11 @@ public class ButtonsLogic : MonoBehaviour
         ApplicationVariables.SceneToLoad = "GymScene";
         SceneManager.LoadScene("LoadingScene");
     }
+    
+    public void TypeOfExercisesSelected()
+    {
+        //ApplicationVariables.TypeOfExercises = type;
+        ApplicationVariables.SceneToLoad = "GymScene";
+        SceneManager.LoadScene("LoadingScene");
+    } 
 }
