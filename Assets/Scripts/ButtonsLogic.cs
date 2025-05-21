@@ -39,11 +39,23 @@ public class ButtonsLogic : MonoBehaviour
         ApplicationVariables.SceneToLoad = "GymScene";
         SceneManager.LoadScene("LoadingScene");
     }
-    
+
     public void TypeOfExercisesSelected()
     {
         //ApplicationVariables.TypeOfExercises = type;
         ApplicationVariables.SceneToLoad = "GymScene";
         SceneManager.LoadScene("LoadingScene");
     } 
+    
+    public void CloseWarnig()
+    {
+        GameObject warning = GameObject.Find("PopUpWarning");
+        if (warning != null)
+        {
+            warning.SetActive(false);
+        }else
+        {
+            Debug.LogWarning("PopUpWarning GameObject not found.");
+        }
+    }
 }
