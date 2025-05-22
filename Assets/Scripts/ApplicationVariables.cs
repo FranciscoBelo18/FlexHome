@@ -5,12 +5,9 @@
 public static class ApplicationVariables
 {
     public static string SceneToLoad = "";
-
     public static string userLoggedID = "";
-
     public static string userLoggedName = "";
-
     public static string TypeOfExercises = "";
-
     public static int PointsEarned = 0;
+    public static string GameVersion = "";
 }
