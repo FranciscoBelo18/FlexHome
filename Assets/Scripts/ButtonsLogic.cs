@@ -11,7 +11,7 @@ public class ButtonsLogic : MonoBehaviour
 
     public void PlayGame()
     {
-        ApplicationVariables.SceneToLoad = "SelectVersionScene";
+        ApplicationVariables.SceneToLoad = "SelectTypeOfExercises";
         SceneManager.LoadScene("LoadingScene");
     }
 
@@ -53,7 +53,7 @@ public class ButtonsLogic : MonoBehaviour
             int selectedIndex = dropdownComponent.value;
             //Debug.Log("Selected index: " + selectedIndex);  
             string version = dropdownComponent.options[selectedIndex].text;
-            Debug.Log("Selected game version: " + version);
+            //Debug.Log("Selected game version: " + version);
 
             if (version == "Standard" || version == "Dynamic")
             {
