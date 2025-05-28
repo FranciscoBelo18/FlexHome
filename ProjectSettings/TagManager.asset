@@ -12,6 +12,13 @@ TagManager:
   - BackMachine
   - BackMachine2
   - StationaryRowing
+  - Lower
+  - Upper
+  - Full
+  - Simple
+  - Dynamic
+  - Tutorial
+  - Play
   layers:
   - Default
   - TransparentFX

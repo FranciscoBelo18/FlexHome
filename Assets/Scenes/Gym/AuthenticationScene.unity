@@ -495,7 +495,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &196441778
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2328,7 +2328,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 873055879}
-  - component: {fileID: 873055880}
+  - component: {fileID: 873055882}
   m_Layer: 0
   m_Name: PlayfabManager
   m_TagString: Untagged
@@ -2351,7 +2351,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &873055880
+--- !u!114 &873055882
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4339,8 +4339,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 873055880}
-        m_TargetAssemblyTypeName: PlayfabManager, Assembly-CSharp
+      - m_Target: {fileID: 873055882}
+        m_TargetAssemblyTypeName: PlayfabAuth, Assembly-CSharp
         m_MethodName: RegisterButton
         m_Mode: 1
         m_Arguments:
@@ -4936,7 +4936,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1993836373
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5193,8 +5193,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 873055880}
-        m_TargetAssemblyTypeName: PlayfabManager, Assembly-CSharp
+      - m_Target: {fileID: 873055882}
+        m_TargetAssemblyTypeName: PlayfabAuth, Assembly-CSharp
         m_MethodName: LoginButton
         m_Mode: 1
         m_Arguments:
