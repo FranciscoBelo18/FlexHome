@@ -17,6 +17,8 @@ TagManager:
   - Full
   - Simple
   - Dynamic
+  - Tutorial
+  - Play
   layers:
   - Default
   - TransparentFX

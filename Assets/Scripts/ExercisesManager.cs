@@ -4,6 +4,7 @@ using PlayFab.ClientModels;
 using PlayFab.DataModels;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ExercisesManager : MonoBehaviour
 {
@@ -34,7 +35,12 @@ public class ExercisesManager : MonoBehaviour
                 foreach (var ex in exercises[selectedType])
                 {
                     Debug.Log(selectedType + " : " + ex);
+                    //criar um novo array para guardar os exercícios
+                    ApplicationVariables.Exercises = exercises[selectedType].ToArray();
                 }
+                //Randomizar a ordem dos exercícios mo array
+                ApplicationVariables.Exercises = ApplicationVariables.Exercises.OrderBy(x => Random.value).ToArray();
+                Debug.Log("Exercises after changing its position randomly: " + string.Join(", ", ApplicationVariables.Exercises));
             }
             else
             {

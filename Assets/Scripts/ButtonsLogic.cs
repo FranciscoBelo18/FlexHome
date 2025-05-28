@@ -8,6 +8,7 @@ public class ButtonsLogic : MonoBehaviour
 {
     public GameObject WarningPopUp;
     public GameObject dropdown;
+    public GameObject PopUpTutorialObject;
 
     public void PlayGame()
     {
@@ -63,19 +64,25 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "LowerBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
-                        SceneManager.LoadScene("LoadingScene");
+                        PopUpTutorialObject.SetActive(true);
+                        Time.timeScale = 0f;
+                        //SceneManager.LoadScene("LoadingScene");
                         break;
                     case "Upper":
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "UpperBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
-                        SceneManager.LoadScene("LoadingScene");
+                        PopUpTutorialObject.SetActive(true);
+                        Time.timeScale = 0f;
+                        //SceneManager.LoadScene("LoadingScene");
                         break;
                     case "Full":
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "FullBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
-                        SceneManager.LoadScene("LoadingScene");
+                        PopUpTutorialObject.SetActive(true);
+                        Time.timeScale = 0f;
+                        //SceneManager.LoadScene("LoadingScene");
                         break;
                     default:
                         Debug.Log("Unknown exercise type selected.");
@@ -86,6 +93,7 @@ public class ButtonsLogic : MonoBehaviour
             {
                 if (WarningPopUp != null)
                 {
+                    Time.timeScale = 0f;
                     WarningPopUp.SetActive(true);
                 }
                 else
@@ -98,17 +106,41 @@ public class ButtonsLogic : MonoBehaviour
         {
             Debug.LogWarning("Dropdown GameObject not found.");
         }
-        
-    } 
-    
+
+    }
+
     public void CloseWarning()
     {
         if (WarningPopUp != null)
         {
             WarningPopUp.SetActive(false);
-        }else
+            Time.timeScale = 1f;
+        }
+        else
         {
             Debug.LogWarning("PopUpWarning GameObject not attached.");
+        }
+    }
+
+    public void PopUpTutorial(GameObject clickedButton)
+    {
+        if (clickedButton.tag == "Tutorial")
+        {
+            PopUpTutorialObject.SetActive(false);
+            //por enquanto nao faz nada, mas depois pode ser usado para mostrar o tutorial
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("LoadingScene");
+            
+        }
+        else if (clickedButton.tag == "Play")
+        {
+            PopUpTutorialObject.SetActive(false);
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("LoadingScene");
+        } 
+        else
+        {
+            Debug.Log("Clicked button non identified.");
         }
     }
 }
