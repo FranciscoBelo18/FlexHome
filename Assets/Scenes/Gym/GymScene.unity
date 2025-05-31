@@ -4318,6 +4318,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Main Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 8571076842338426121, guid: 140d1d2c406167c50819d89f86d9092e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8571076842338426122, guid: 140d1d2c406167c50819d89f86d9092e,
         type: 3}
       propertyPath: m_Camera
@@ -79961,6 +79966,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exerciseText: {fileID: 1651292534}
+  timer: {fileID: 1074849071}
 --- !u!4 &1066505084
 Transform:
   m_ObjectHideFlags: 0

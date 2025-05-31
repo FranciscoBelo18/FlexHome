@@ -13,7 +13,7 @@ public static class ApplicationVariables
     public static string[] Exercises = new string[0];
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
-    public static string ActualState = "";
-    public static float TimeLimitToCompleteExercise = 90;
-    public static float TimeToDisplayExerciseDemo = 20;
+    public static string ActualState = "ExerciseDemo";
+    public static float TimeLimitToCompleteExercise = 10;
+    public static float TimeToDisplayExerciseDemo = 5;
 }
