@@ -14,6 +14,10 @@ public class GameManager : MonoBehaviour
     public GameObject UserPoseDisplay;
     public GameObject DemoVideoDisplay;
     private string previousState = "";
+    public GameObject PopUpExercisesCompleted;
+    public GameObject TimerObject;
+    public GameObject exTextObj;
+    public GameObject gamePhaseTextObj;
     void Start()
     {
         Debug.Log("--------------------------------------------");
@@ -25,39 +29,49 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Atualiza o texto do exercício se necessário
-        if (exerciseText.text != "Active Exercise: " + ApplicationVariables.ActualExercise)
+        if (!ApplicationVariables.isAllExercisesCompleted)
         {
-            UpdateExerciseText();
-        }
-
-        // Verifica se houve mudança de estado
-        if (previousState != ApplicationVariables.ActualState)
-        {
-            Debug.Log($"State changed from {previousState} to {ApplicationVariables.ActualState}");
-
-            // Se mudou de Gameplay para ExerciseDemo
-            if (previousState == "Exercise" && ApplicationVariables.ActualState == "ExerciseDemo")
+            if (exerciseText.text != "Active Exercise: " + ApplicationVariables.ActualExercise)
             {
-                UpdateActiveExercise();
                 UpdateExerciseText();
             }
 
-            UpdateGamePhaseText();
-            previousState = ApplicationVariables.ActualState;
-        }
+            if (previousState != ApplicationVariables.ActualState)
+            {
+                if (previousState == "Exercise" && ApplicationVariables.ActualState == "ExerciseDemo")
+                {
+                    UpdateActiveExercise();
+                    UpdateExerciseText();
+                }
 
-        // Ativar/desativar displays com base no estado atual
-        if (ApplicationVariables.ActualState == "ExerciseDemo")
-        {
-            UserPoseDisplay.SetActive(false);
-            DemoVideoDisplay.SetActive(true);
+                UpdateGamePhaseText();
+                previousState = ApplicationVariables.ActualState;
+            }
+
+            if (ApplicationVariables.ActualState == "ExerciseDemo")
+            {
+                UserPoseDisplay.SetActive(false);
+                DemoVideoDisplay.SetActive(true);
+            }
+            else if (ApplicationVariables.ActualState == "Exercise")
+            {
+                UserPoseDisplay.SetActive(true);
+                DemoVideoDisplay.SetActive(false);
+            }
         }
-        else if (ApplicationVariables.ActualState == "Exercise")
+        else
         {
-            UserPoseDisplay.SetActive(true);
-            DemoVideoDisplay.SetActive(false);
+            if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
+            {
+                TimerObject.SetActive(false);
+                UserPoseDisplay.SetActive(false);
+                DemoVideoDisplay.SetActive(false);
+                gamePhaseTextObj.SetActive(false);
+                exTextObj.SetActive(false);
+                PopUpExercisesCompleted.SetActive(true);
+            }
         }
+        
     }
 
 
@@ -127,7 +141,6 @@ public class GameManager : MonoBehaviour
             ApplicationVariables.isAllExercisesCompleted = true;
             //ApplicationVariables.ActualState = "FinishedAllExercises";
             Debug.Log("All exercises completed.");
-            Time.timeScale = 0; // Pausa o jogo
         }
     }
 
