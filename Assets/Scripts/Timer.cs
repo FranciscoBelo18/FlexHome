@@ -45,8 +45,7 @@ public class Timer : MonoBehaviour
         {
             gameObject.SetActive(false);
             SwitchStateAndRestart();
-            //desativar o timer
-            
+            gameObject.SetActive(true);
         }
     }
 
