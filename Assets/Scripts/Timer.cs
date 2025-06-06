@@ -35,7 +35,7 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        time -= Time.deltaTime;
+        time -= Time.unscaledDeltaTime;
         time = Mathf.Max(0, time); // Evita valores negativos
 
         timerText.text = ((int)time).ToString();

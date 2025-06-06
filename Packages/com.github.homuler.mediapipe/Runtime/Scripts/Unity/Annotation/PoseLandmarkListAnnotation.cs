@@ -266,40 +266,6 @@ namespace Mediapipe.Unity
               _landmarkListAnnotation[i].SetActive(false);
           }
       }
-      if (!mask.HasFlag(BodyParts.LeftArm))
-      {
-        // deactivate left elbow to hide left arm
-        _landmarkListAnnotation[13].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.LeftHand))
-      {
-        // deactive left wrist, thumb, index and pinky to hide left hand
-        _landmarkListAnnotation[15].SetActive(false);
-        _landmarkListAnnotation[17].SetActive(false);
-        _landmarkListAnnotation[19].SetActive(false);
-        _landmarkListAnnotation[21].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.RightArm))
-      {
-        // deactivate right elbow to hide right arm
-        _landmarkListAnnotation[14].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.RightHand))
-      {
-        // deactivate right wrist, thumb, index and pinky to hide right hand
-        _landmarkListAnnotation[16].SetActive(false);
-        _landmarkListAnnotation[18].SetActive(false);
-        _landmarkListAnnotation[20].SetActive(false);
-        _landmarkListAnnotation[22].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.LowerBody))
-      {
-        // deactivate lower body landmarks
-        for (var i = 25; i <= 32; i++)
-        {
-          _landmarkListAnnotation[i].SetActive(false);
-        }
-      }
     }
   }
 }
