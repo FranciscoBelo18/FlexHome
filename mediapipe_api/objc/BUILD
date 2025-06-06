@@ -20,13 +20,15 @@ objc_library(
     ],
     deps = [
         "//mediapipe_api:mediapipe_c",
-        "@ios_opencv//:OpencvFramework",
-    ],
+    ] + select({
+        "@opencv//:opencv_ios_source_build": ["@ios_opencv_source//:opencv_xcframework"],
+        "//conditions:default": ["@ios_opencv//:OpencvFramework"],
+    }),
 )
 
 ios_framework(
     name = "MediaPipeUnity",
-    bundle_id = "PLEASE_SET_YOUR_BUNDLE_ID_HERE",
+    bundle_id = "com.github.homuler.mediapipe.unity",
     families = [
         "iphone",
         "ipad",
