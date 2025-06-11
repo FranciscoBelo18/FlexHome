@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class GameManager : MonoBehaviour
     public GameObject gamePhaseTextObj;
     public ReadStretchingFile readStretchingFile;
     private SortedDictionary<int, int> JointAnglePair;
+    private GameObject landmarkListAnnotation;
+    private GameObject[] landmarkPoints;
+    public Dictionary<int, int[]> JointsToCalculateAngles = new Dictionary<int, int[]>();
+
     void Start()
     {
         Debug.Log("--------------------------------------------");
@@ -27,6 +32,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game version: " + ApplicationVariables.GameVersion);
         Debug.Log("--------------------------------------------");
         GetExercises();
+        GetJointsToCalculateAngles();
     }
 
     void Update()
@@ -59,6 +65,16 @@ public class GameManager : MonoBehaviour
             {
                 UserPoseDisplay.SetActive(true);
                 DemoVideoDisplay.SetActive(false);
+                StartCoroutine(CacheLandmarkPointsWhenReady());
+            }
+
+            if (landmarkPoints != null && landmarkPoints.Length > 12)
+            {
+                var leftShoulder = landmarkPoints[12];
+                if (leftShoulder.activeInHierarchy)
+                {
+                    leftShoulder.GetComponent<Renderer>().material.color = Color.red;
+                }
             }
         }
         else
@@ -130,6 +146,42 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    public void GetJointsToCalculateAngles()
+    {
+        PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
+        {
+            if (result.Data != null && result.Data.ContainsKey("Angles"))
+            {
+                string jointsJson = result.Data["Angles"];
+                Debug.Log("Joints JSON: " + jointsJson);
+
+                // Primeiro ler como Dictionary<string, int[]>
+                var tempDict = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(jointsJson);
+
+                // Converter para Dictionary<int, int[]>
+                foreach (var kvp in tempDict)
+                {
+                    int key = int.Parse(kvp.Key);
+                    JointsToCalculateAngles[key] = kvp.Value;
+                }
+
+                // Exemplo de debug
+                foreach (var kvp in JointsToCalculateAngles)
+                {
+                    Debug.Log($"Joint {kvp.Key}: [{string.Join(", ", kvp.Value)}]");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No Angles key found in title data.");
+            }
+        },
+        error =>
+        {
+            Debug.LogError("Error getting title data of angles: " + error.GenerateErrorReport());
+        });
+    }
+
 
     public void UpdateActiveExercise()
     {
@@ -178,7 +230,7 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("gamePhaseText is not assigned in the inspector.");
         }
     }
-    
+
     public void GetExerciseAnglesFromFile()
     {
         Debug.Log("Reading angles for exercise: " + ApplicationVariables.ActualExercise);
@@ -189,4 +241,26 @@ public class GameManager : MonoBehaviour
             Debug.Log("Joint: " + kvp.Key + ", Angle: " + kvp.Value);
         }
     }
+
+    IEnumerator CacheLandmarkPointsWhenReady()
+    {
+        while (GameObject.Find("Point List Annotation") == null ||
+            GameObject.Find("Point List Annotation").transform.childCount < 33)
+        {
+            yield return null; // espera até o objeto e os filhos existirem
+        }
+
+        landmarkListAnnotation = GameObject.Find("Point List Annotation");
+
+        int count = landmarkListAnnotation.transform.childCount;
+        landmarkPoints = new GameObject[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            landmarkPoints[i] = landmarkListAnnotation.transform.GetChild(i).gameObject;
+        }
+
+        //Debug.Log("Landmark points atualizados.");
+    }
+
 }

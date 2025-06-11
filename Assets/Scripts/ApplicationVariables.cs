@@ -14,6 +14,6 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 600;
+    public static float TimeLimitToCompleteExercise = 20;
     public static float TimeToDisplayExerciseDemo = 5;
 }
