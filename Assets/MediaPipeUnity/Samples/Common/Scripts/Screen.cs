@@ -58,7 +58,7 @@ namespace Mediapipe.Unity
 
     private void ResetUvRect(RunningMode runningMode)
     {
-      var rect = new UnityEngine.Rect(0, 0, -1, 1);
+      var rect = new UnityEngine.Rect(0, 0, 1, 1);
 
       if (_imageSource.isVerticallyFlipped && runningMode == RunningMode.Async)
       {
@@ -74,7 +74,8 @@ namespace Mediapipe.Unity
 
         if (rotation == RotationAngle.Rotation0 || rotation == RotationAngle.Rotation180)
         {
-          rect = FlipHorizontally(rect);
+          Debug.Log("asdadas");
+          //rect = FlipHorizontally(rect);
         }
         else
         {
