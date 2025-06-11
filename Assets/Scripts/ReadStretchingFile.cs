@@ -28,7 +28,7 @@ public class ReadStretchingFile : MonoBehaviour
                 if (line.StartsWith(ExerciseName + ":"))
                 {
                     string ExerciseValues = line.Substring(line.IndexOf(':') + 1).Trim();
-                    Debug.Log("Só dos squats -> " + ExerciseValues);
+                    //Debug.Log("Exercicio é " + ExerciseName + " -> " + ExerciseValues);
                     string[] values = ExerciseValues.Split(' ');
                     foreach (string value in values) {
                         //Debug.Log("Valor: " + value);

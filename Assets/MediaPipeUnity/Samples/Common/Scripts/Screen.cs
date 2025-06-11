@@ -58,7 +58,7 @@ namespace Mediapipe.Unity
 
     private void ResetUvRect(RunningMode runningMode)
     {
-      var rect = new UnityEngine.Rect(0, 0, 1, 1);
+      var rect = new UnityEngine.Rect(0, 0, -1, 1);
 
       if (_imageSource.isVerticallyFlipped && runningMode == RunningMode.Async)
       {

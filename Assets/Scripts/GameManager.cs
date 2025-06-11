@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     public GameObject TimerObject;
     public GameObject exTextObj;
     public GameObject gamePhaseTextObj;
+    public ReadStretchingFile readStretchingFile;
+    private SortedDictionary<int, int> JointAnglePair;
     void Start()
     {
         Debug.Log("--------------------------------------------");
@@ -71,7 +73,7 @@ public class GameManager : MonoBehaviour
                 PopUpExercisesCompleted.SetActive(true);
             }
         }
-        
+
     }
 
 
@@ -111,6 +113,7 @@ public class GameManager : MonoBehaviour
                     if (teste != null)
                     {
                         Debug.Log("Current exercise: " + teste.name + ", bool do together: " + teste.together);
+                        GetExerciseAnglesFromFile();
                     }
 
                     UpdateExerciseText();
@@ -135,6 +138,7 @@ public class GameManager : MonoBehaviour
         if (currentExerciseIndex >= 0 && currentExerciseIndex < ApplicationVariables.Exercises.Length - 1)
         {
             ApplicationVariables.ActualExercise = ApplicationVariables.Exercises[currentExerciseIndex + 1];
+            GetExerciseAnglesFromFile();
         }
         else
         {
@@ -160,11 +164,11 @@ public class GameManager : MonoBehaviour
     {
         if (gamePhaseText != null)
         {
-            if(ApplicationVariables.ActualState == "ExerciseDemo")
+            if (ApplicationVariables.ActualState == "ExerciseDemo")
             {
                 gamePhaseText.text = "Exercise Demo";
             }
-            else if(ApplicationVariables.ActualState == "Exercise")
+            else if (ApplicationVariables.ActualState == "Exercise")
             {
                 gamePhaseText.text = "Gameplay";
             }
@@ -172,6 +176,17 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("gamePhaseText is not assigned in the inspector.");
+        }
+    }
+    
+    public void GetExerciseAnglesFromFile()
+    {
+        Debug.Log("Reading angles for exercise: " + ApplicationVariables.ActualExercise);
+        JointAnglePair = readStretchingFile.ReadFile(ApplicationVariables.ActualExercise);
+        Debug.Log("Joint angles for exercise: " + ApplicationVariables.ActualExercise);
+        foreach (KeyValuePair<int, int> kvp in JointAnglePair)
+        {
+            Debug.Log("Joint: " + kvp.Key + ", Angle: " + kvp.Value);
         }
     }
 }
