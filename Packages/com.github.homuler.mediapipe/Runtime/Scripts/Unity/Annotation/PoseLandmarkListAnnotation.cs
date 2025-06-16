@@ -171,22 +171,22 @@ namespace Mediapipe.Unity
 
     public void Draw(IReadOnlyList<NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(NormalizedLandmarkList target, bool visualizeZ = false)
     {
-      Draw(target?.Landmark, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target?.Landmark, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(IReadOnlyList<mptcc.NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(mptcc.NormalizedLandmarks target, bool visualizeZ = false)
     {
-      Draw(target.landmarks, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target.landmarks, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     private void ApplyLeftLandmarkColor(Color color)
@@ -215,15 +215,27 @@ namespace Mediapipe.Unity
       {
         bool isActive = true;
 
-        // Desativa a face se o BodyParts.Face não estiver na máscara
+        // Desativar rosto
         if (!mask.HasFlag(BodyParts.Face) && i <= 10)
         {
           isActive = false;
         }
 
-        // Você pode expandir essa lógica se quiser controle mais fino
+        // Desativar mão esquerda
+        if (!mask.HasFlag(BodyParts.LeftHand) && (i == 15 || i == 17 || i == 19 || i == 21))
+        {
+          isActive = false;
+        }
+
+        // Desativar mão direita
+        if (!mask.HasFlag(BodyParts.RightHand) && (i == 16 || i == 18 || i == 20 || i == 22))
+        {
+          isActive = false;
+        }
+
         _landmarkListAnnotation[i].SetActive(isActive);
       }
     }
+
   }
 }

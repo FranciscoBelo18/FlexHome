@@ -23,7 +23,8 @@ public class GameManager : MonoBehaviour
     private SortedDictionary<int, int> JointAnglePair;
     private GameObject landmarkListAnnotation;
     private GameObject[] landmarkPoints;
-    public Dictionary<int, int[]> JointsToCalculateAngles = new Dictionary<int, int[]>();
+    public JointAngleCalculation jointAngleCalculation;
+    private int[] activeExerciseJoints = new int[0];
 
     void Start()
     {
@@ -32,7 +33,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game version: " + ApplicationVariables.GameVersion);
         Debug.Log("--------------------------------------------");
         GetExercises();
-        GetJointsToCalculateAngles();
+        jointAngleCalculation.GetJointsToCalculateAngles();
     }
 
     void Update()
@@ -66,9 +67,10 @@ public class GameManager : MonoBehaviour
                 UserPoseDisplay.SetActive(true);
                 DemoVideoDisplay.SetActive(false);
                 StartCoroutine(CacheLandmarkPointsWhenReady());
+                AnalyzePose();
             }
 
-            if (landmarkPoints != null && landmarkPoints.Length > 12)
+            if (landmarkPoints != null)
             {
                 var leftShoulder = landmarkPoints[12];
                 if (leftShoulder.activeInHierarchy)
@@ -129,10 +131,10 @@ public class GameManager : MonoBehaviour
                     if (teste != null)
                     {
                         Debug.Log("Current exercise: " + teste.name + ", bool do together: " + teste.together);
-                        GetExerciseAnglesFromFile();
+                        GetExerciseJointsAndAnglesFromFile();
                     }
 
-                    UpdateExerciseText();
+                    //UpdateExerciseText();
                 }
             }
             else
@@ -146,51 +148,14 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    public void GetJointsToCalculateAngles()
-    {
-        PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
-        {
-            if (result.Data != null && result.Data.ContainsKey("Angles"))
-            {
-                string jointsJson = result.Data["Angles"];
-                Debug.Log("Joints JSON: " + jointsJson);
-
-                // Primeiro ler como Dictionary<string, int[]>
-                var tempDict = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(jointsJson);
-
-                // Converter para Dictionary<int, int[]>
-                foreach (var kvp in tempDict)
-                {
-                    int key = int.Parse(kvp.Key);
-                    JointsToCalculateAngles[key] = kvp.Value;
-                }
-
-                // Exemplo de debug
-                foreach (var kvp in JointsToCalculateAngles)
-                {
-                    Debug.Log($"Joint {kvp.Key}: [{string.Join(", ", kvp.Value)}]");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("No Angles key found in title data.");
-            }
-        },
-        error =>
-        {
-            Debug.LogError("Error getting title data of angles: " + error.GenerateErrorReport());
-        });
-    }
-
-
     public void UpdateActiveExercise()
     {
         var currentExerciseIndex = System.Array.IndexOf(ApplicationVariables.Exercises, ApplicationVariables.ActualExercise);
-        Debug.Log("Current exercise index: " + currentExerciseIndex);
+        //Debug.Log("Current exercise index: " + currentExerciseIndex);
         if (currentExerciseIndex >= 0 && currentExerciseIndex < ApplicationVariables.Exercises.Length - 1)
         {
             ApplicationVariables.ActualExercise = ApplicationVariables.Exercises[currentExerciseIndex + 1];
-            GetExerciseAnglesFromFile();
+            GetExerciseJointsAndAnglesFromFile();
         }
         else
         {
@@ -231,15 +196,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GetExerciseAnglesFromFile()
+    public void GetExerciseJointsAndAnglesFromFile()
     {
-        Debug.Log("Reading angles for exercise: " + ApplicationVariables.ActualExercise);
+        //Debug.Log("Reading angles for exercise: " + ApplicationVariables.ActualExercise);
         JointAnglePair = readStretchingFile.ReadFile(ApplicationVariables.ActualExercise);
-        Debug.Log("Joint angles for exercise: " + ApplicationVariables.ActualExercise);
-        foreach (KeyValuePair<int, int> kvp in JointAnglePair)
+        //Debug.Log("Joint angles for exercise: " + ApplicationVariables.ActualExercise);
+        /*foreach (KeyValuePair<int, int> kvp in JointAnglePair)
         {
             Debug.Log("Joint: " + kvp.Key + ", Angle: " + kvp.Value);
-        }
+        }*/
+        activeExerciseJoints = JointAnglePair.Keys.ToArray();
+        //Debug.LogWarning("Active exercise joints: " + string.Join(", ", activeExerciseJoints));
+        //jointAngleCalculation.CalculateAngle(activeExerciseJoints, landmarkPoints);
     }
 
     IEnumerator CacheLandmarkPointsWhenReady()
@@ -261,6 +229,41 @@ public class GameManager : MonoBehaviour
         }
 
         //Debug.Log("Landmark points atualizados.");
+    }
+    
+    public void AnalyzePose()
+    {
+        foreach (var ExJoint in activeExerciseJoints)
+        {
+            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+            {
+                if (joints.Key == ExJoint)
+                {
+                    var jointsToCalculateAngle = joints.Value;
+                    float angle = jointAngleCalculation.CalculateAngle(jointsToCalculateAngle, landmarkPoints);
+                    foreach (var joint in JointAnglePair)
+                    {
+                        if (joint.Key == joints.Key)
+                        {
+                            //obter o valor absoluto da diferença entre o angulo calculado e o angulo do ficheiro
+                            float angleDifference = Mathf.Abs(angle - joint.Value);
+                            if (angleDifference <= ApplicationVariables.GoodPerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            else if (angleDifference <= ApplicationVariables.AveragePerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            }
+                            else
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

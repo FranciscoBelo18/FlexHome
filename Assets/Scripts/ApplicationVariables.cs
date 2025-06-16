@@ -1,6 +1,8 @@
 //por estar como static vai estar acessivel quando o jogo estiver a executar independentemente das mudanças de cena
 //apenas será resetado quando o jogo for fechado, e entao vai ajudar para ir guardando os dados temporariamente 
 //para depois fazer o respetivo tratamento
+using System.Collections.Generic;
+using UnityEngine;
 
 public static class ApplicationVariables
 {
@@ -14,6 +16,11 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 20;
-    public static float TimeToDisplayExerciseDemo = 5;
+    public static float TimeLimitToCompleteExercise = 200;
+    public static float TimeToDisplayExerciseDemo = 15;
+    public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
+    public static int GoodPerformanceRange = 20;
+    public static int AveragePerformanceRange = 40;
+    public static int BadPerformanceRange = 60;
+    
 }
