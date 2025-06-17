@@ -25,6 +25,11 @@ public class GameManager : MonoBehaviour
     private GameObject[] landmarkPoints;
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
+    private List<ExerciseData> selectedExercises = new List<ExerciseData>();
+    private bool reachedBasePosition = false;
+    private int[] KneesJoints = new int[] { 25, 26 }; 
+    public PointsSystem pointsSystem;
+    public TextMeshPro totalPointsText;
 
     void Start()
     {
@@ -38,6 +43,15 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (totalPointsText != null)
+        {
+            totalPointsText.text = "Total Points: " + ApplicationVariables.PointsEarned;
+        }
+        else
+        {
+            Debug.LogWarning("totalPointsText is not assigned in the inspector.");
+        }
+
         if (!ApplicationVariables.isAllExercisesCompleted)
         {
             if (exerciseText.text != "Active Exercise: " + ApplicationVariables.ActualExercise)
@@ -68,15 +82,6 @@ public class GameManager : MonoBehaviour
                 DemoVideoDisplay.SetActive(false);
                 StartCoroutine(CacheLandmarkPointsWhenReady());
                 AnalyzePose();
-            }
-
-            if (landmarkPoints != null)
-            {
-                var leftShoulder = landmarkPoints[12];
-                if (leftShoulder.activeInHierarchy)
-                {
-                    leftShoulder.GetComponent<Renderer>().material.color = Color.red;
-                }
             }
         }
         else
@@ -117,7 +122,7 @@ public class GameManager : MonoBehaviour
                 if (allExercises.ContainsKey(selectedType))
                 {
 
-                    List<ExerciseData> selectedExercises = allExercises[selectedType];
+                    selectedExercises = allExercises[selectedType];
 
                     selectedExercises = selectedExercises.OrderBy(x => Random.value).ToList();
 
@@ -230,7 +235,7 @@ public class GameManager : MonoBehaviour
 
         //Debug.Log("Landmark points atualizados.");
     }
-    
+
     public void AnalyzePose()
     {
         foreach (var ExJoint in activeExerciseJoints)
@@ -264,6 +269,100 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        CheckAllJointsColor();
     }
 
+    private void CheckAllJointsColor()
+    {
+        bool allGreen = true;
+        foreach (var joint in activeExerciseJoints)
+        {
+            if (landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green)
+            {
+                allGreen = false;
+                break;
+            }
+        }
+
+        if (allGreen)
+        {
+            ApplicationVariables.PointsEarned += 10;
+            var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+            if (currentExerciseData != null)
+            {
+                while(reachedBasePosition == false)
+                {
+                    foreach (var kneeJoint in KneesJoints)
+                    {
+                        float kneeAngle = jointAngleCalculation.CalculateAngle(ApplicationVariables.JointGroupsFromPlayfab[kneeJoint], landmarkPoints);
+                        if (Mathf.Abs(kneeAngle - ApplicationVariables.BasePoseKneeAngle) <= ApplicationVariables.GoodPerformanceRange)
+                        {
+                            landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.green;
+                            reachedBasePosition = true;
+                        }
+                        else if (Mathf.Abs(kneeAngle - ApplicationVariables.BasePoseKneeAngle) <= ApplicationVariables.AveragePerformanceRange)
+                        {
+                            landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            reachedBasePosition = false;
+                        }
+                        else
+                        {
+                            landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.red;
+                            reachedBasePosition = false;
+                        }
+                    }
+                }
+                pointsSystem.AddPointsRepCompleted();
+                ApplicationVariables.RepsCompleted++;
+                //Debug.LogWarning("Current exercise: " + currentExerciseData.name + ", bool do together: " + currentExerciseData.together);
+                if (!currentExerciseData.together)
+                {
+                    SwapLegs();
+                }
+            }
+        }
+    }
+
+    private void SwapLegs()
+    {
+        SortedDictionary<int, int> swappedJointAnglePair = new SortedDictionary<int, int>();
+
+        var keys = JointAnglePair.Keys.OrderBy(k => k).ToList();
+        for (int i = 0; i < keys.Count - 1; i++)
+        {
+            int currentKey = keys[i];
+
+            if (currentKey % 2 != 0) // se for ímpar
+            {
+                int nextKey = keys[i + 1];
+
+                if (nextKey == currentKey + 1)
+                {
+                    swappedJointAnglePair[nextKey] = JointAnglePair[currentKey];
+                    swappedJointAnglePair[currentKey] = JointAnglePair[nextKey];
+
+                    i++;
+                }
+                else
+                {
+                    swappedJointAnglePair[currentKey] = JointAnglePair[currentKey];
+                }
+            }
+            else if (!swappedJointAnglePair.ContainsKey(currentKey))
+            {
+                // adiciona os que não entraram na lógica de troca
+                swappedJointAnglePair[currentKey] = JointAnglePair[currentKey];
+            }
+        }
+
+        // caso o último item não tenha sido tratado
+        if (!swappedJointAnglePair.ContainsKey(keys[^1]))
+        {
+            swappedJointAnglePair[keys[^1]] = JointAnglePair[keys[^1]];
+        }
+
+        // Atualiza o dicionário principal e os joints ativos
+        JointAnglePair = swappedJointAnglePair;
+        activeExerciseJoints = JointAnglePair.Keys.ToArray();
+    }
 }

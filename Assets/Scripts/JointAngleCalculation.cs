@@ -67,5 +67,4 @@ public class JointAngleCalculation : MonoBehaviour
 
         return angle;
     }
-
 }
