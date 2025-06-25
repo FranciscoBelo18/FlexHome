@@ -233,9 +233,14 @@ namespace Mediapipe.Unity
           isActive = false;
         }
 
+        // Desativar pés
+        if (i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
+        {
+          isActive = false;
+        }
+
         _landmarkListAnnotation[i].SetActive(isActive);
       }
     }
-
   }
 }

@@ -19,6 +19,9 @@ TagManager:
   - Dynamic
   - Tutorial
   - Play
+  - LowestGoal
+  - MediumGoal
+  - HighestGoal
   layers:
   - Default
   - TransparentFX

@@ -13,4 +13,14 @@ public class PointsSystem : MonoBehaviour
         ApplicationVariables.PointsEarned += 50;
     }
 
+    public void AddPointsFromGoal(int goalPoints)
+    {
+        ApplicationVariables.PointsEarned += goalPoints;
+    }
+
+    public int GetPointsEarned()
+    {
+        return ApplicationVariables.PointsEarned;
+    }
+
 }

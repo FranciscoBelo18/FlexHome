@@ -8,35 +8,30 @@ public class Timer : MonoBehaviour
     public Image timerCircle;
     public TextMeshProUGUI timerText;
     private float initialTime;
+    private bool isPaused = false;
 
     void Start()
     {
-        time = ApplicationVariables.TimeToDisplayExerciseDemo;
-        initialTime = time;
-        timerText.text = ((int)initialTime).ToString();
-        timerCircle.fillAmount = 1f;
+        SetInitialTime();
+        ResetTimerVisuals();
     }
-
 
     void OnEnable()
     {
-        if (ApplicationVariables.ActualState == "ExerciseDemo")
-        {
-            time = ApplicationVariables.TimeToDisplayExerciseDemo;
-        }
-        else if (ApplicationVariables.ActualState == "Exercise")
-        {
-            time = ApplicationVariables.TimeLimitToCompleteExercise;
-        }
-
-        initialTime = time;
+        SetInitialTime();
         ResetTimerVisuals();
     }
 
     void Update()
     {
-        time -= Time.unscaledDeltaTime;
-        time = Mathf.Max(0, time); // Evita valores negativos
+        if (isPaused)
+        {
+            Debug.LogWarning("Timer está pausado no update");
+            return;
+        }
+
+        time -= Time.deltaTime;
+        time = Mathf.Max(0, time);
 
         timerText.text = ((int)time).ToString();
         timerCircle.fillAmount = time / initialTime;
@@ -49,6 +44,20 @@ public class Timer : MonoBehaviour
         }
     }
 
+    private void SetInitialTime()
+    {
+        if (ApplicationVariables.ActualState == "ExerciseDemo")
+        {
+            time = ApplicationVariables.TimeToDisplayExerciseDemo;
+        }
+        else if (ApplicationVariables.ActualState == "Exercise")
+        {
+            time = ApplicationVariables.TimeLimitToCompleteExercise;
+        }
+
+        initialTime = time;
+    }
+
     void ResetTimerVisuals()
     {
         timerText.text = ((int)initialTime).ToString();
@@ -57,7 +66,6 @@ public class Timer : MonoBehaviour
 
     void SwitchStateAndRestart()
     {
-        // Alterna o estado
         if (ApplicationVariables.ActualState == "ExerciseDemo")
         {
             ApplicationVariables.ActualState = "Exercise";
@@ -66,5 +74,27 @@ public class Timer : MonoBehaviour
         {
             ApplicationVariables.ActualState = "ExerciseDemo";
         }
+    }
+    public void PauseTimer()
+    {
+        Debug.LogWarning("Timer pausado");
+        isPaused = true;
+    }
+
+    public void ResumeTimer()
+    {
+        Debug.LogWarning("Timer retomado");
+        isPaused = false;
+    }
+
+    public void ForceEndTimer()
+    {
+        Debug.LogWarning("Timer forçado a terminar");
+        time = 0;
+    }
+
+    public float GetTime()
+    {
+        return time;
     }
 }
