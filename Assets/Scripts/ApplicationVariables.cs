@@ -16,7 +16,7 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 120;
+    public static float TimeLimitToCompleteExercise = 10;
     public static float TimeToDisplayExerciseDemo = 10;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
     public static int GoodPerformanceRange = 35;

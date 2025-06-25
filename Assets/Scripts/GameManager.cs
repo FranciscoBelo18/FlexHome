@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
     public GameObject ScreenDisplay;
     public Timer timer;
     private bool isTimerPausedByOutOfBounds = false;
+    public TextMeshProUGUI activeLegText;
+    public GameObject activeLegObject;
 
     void Start()
     {
@@ -80,6 +82,13 @@ public class GameManager : MonoBehaviour
                     swapCounter = 0;
                 }
 
+                var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+               
+                if (currentExerciseData != null && !currentExerciseData.together)
+                {
+                    activeLegObject.SetActive(true);
+                }
+
                 UpdateGamePhaseText();
                 previousState = ApplicationVariables.ActualState;
             }
@@ -89,6 +98,8 @@ public class GameManager : MonoBehaviour
                 UserPoseDisplay.SetActive(false);
                 DemoVideoDisplay.SetActive(true);
                 ApplicationVariables.RepsCompleted = 0;
+                activeLegText.text = "Right Leg";
+                activeLegObject.SetActive(false);
             }
             else if (ApplicationVariables.ActualState == "Exercise")
             {
@@ -260,55 +271,98 @@ public class GameManager : MonoBehaviour
             isWaitingForBaseReturn = true;
 
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+
             if (currentExerciseData != null)
             {
-                StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
+                if (currentExerciseData.together)
+                {
+                    StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
+                }
+                else
+                {
+                    SwapLegs();
+                    ChangeActiveLegText();
+                    isInFinalPosition = false;
+                    isWaitingForBaseReturn = false;
+                }
+            }
+        }
+    }
+
+    private void ChangeActiveLegText()
+    {
+        if (activeLegText != null)
+        {
+            if (activeLegText.text == "Left Leg")
+            {
+                activeLegText.text = "Right Leg";
+            }
+            else if (activeLegText.text == "Right Leg")
+            {
+                activeLegText.text = "Left Leg";
             }
         }
     }
 
     private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
     {
+        bool leftFinalPosition = false;
         bool reachedBase = false;
 
-        while (!reachedBase)
+        // Etapa 1: Espera o usuário sair da posição final (agachada)
+        while (!leftFinalPosition)
         {
-            foreach (var kneeJoint in KneesJoints)
-            {
-                float kneeAngle = jointAngleCalculation.CalculateAngle(ApplicationVariables.JointGroupsFromPlayfab[kneeJoint], landmarkPoints);
-                float angleDiff = Mathf.Abs(kneeAngle - ApplicationVariables.BasePoseKneeAngle);
+            bool anyNotGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green);
 
-                if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.green;
-                    reachedBase = true;
-                }
-                else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                }
-                else
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.red;
-                }
+            if (anyNotGreen)
+            {
+                leftFinalPosition = true;
             }
 
             yield return new WaitForSeconds(0.1f);
         }
 
-        if (currentExerciseData.together)
+        while (!reachedBase)
         {
-            pointsSystem.AddPointsRepCompleted();
-            ApplicationVariables.RepsCompleted++;
+            bool kneesAtBase = true;
+
+            foreach (var kneeJoint in KneesJoints)
+            {
+                float kneeAngle = jointAngleCalculation.CalculateAngle(ApplicationVariables.JointGroupsFromPlayfab[kneeJoint], landmarkPoints);
+
+                float angleDiff = Mathf.Abs(kneeAngle - ApplicationVariables.BasePoseKneeAngle);
+
+                if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                {
+                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.green;
+                }
+                else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                {
+                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                    kneesAtBase = false;
+                }
+                else
+                {
+                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.red;
+                    kneesAtBase = false;
+                }
+            }
+
+            if (kneesAtBase)
+            {
+                reachedBase = true;
+            }
+
+            yield return new WaitForSeconds(0.1f);
         }
-        else
-        {
-            SwapLegs();
-        }
+
+        pointsSystem.AddPointsRepCompleted();
+        ApplicationVariables.RepsCompleted++;
 
         isInFinalPosition = false;
         isWaitingForBaseReturn = false;
     }
+
 
     private void SwapLegs()
     {
