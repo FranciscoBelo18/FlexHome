@@ -49,7 +49,6 @@ public class PlayfabAuth : MonoBehaviour
     private void OnRegisterSuccess(RegisterPlayFabUserResult result)
     {
         Debug.Log("Registration successful: " + result.PlayFabId);
-        ApplicationVariables.userLoggedID = result.PlayFabId;
         PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
         ApplicationVariables.SceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");
@@ -83,7 +82,6 @@ public class PlayfabAuth : MonoBehaviour
     private void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Login successful: " + result.PlayFabId);
-        ApplicationVariables.userLoggedID = result.PlayFabId;
         PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
         ApplicationVariables.SceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");

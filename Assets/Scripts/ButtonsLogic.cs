@@ -16,9 +16,9 @@ public class ButtonsLogic : MonoBehaviour
         SceneManager.LoadScene("LoadingScene");
     }
 
-    public void Profile()
+    public void Settings()
     {
-        ApplicationVariables.SceneToLoad = "ProfileScene";
+        ApplicationVariables.SceneToLoad = "SettingsScene";
         SceneManager.LoadScene("LoadingScene");
     }
 

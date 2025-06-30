@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using System.Collections;
+using UnityEngine.Video;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,7 +37,6 @@ public class GameManager : MonoBehaviour
     private bool isWaitingForBaseReturn = false;
     public GameObject ScreenDisplay;
     public Timer timer;
-    private bool isTimerPausedByOutOfBounds = false;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
     public LeaderboardManager leaderboardManager;
@@ -44,6 +44,8 @@ public class GameManager : MonoBehaviour
     private AudioSource audioSource;
     public GameObject SettingsButton;
     public GameObject SettingsPopUp;
+    public VideoPlayer TutorialVideo;
+    public GameObject PopUpWarningOutOfBounds;
 
     void Start()
     {
@@ -126,17 +128,28 @@ public class GameManager : MonoBehaviour
                         timer.PauseTimer();
                     }
                 }*/
-                AnalyzePose();
+                if (!timer.IsTimerPaused())
+                {
+                    AnalyzePose();
+                }
             }
             if (SettingsPopUp.activeSelf)
             {
                 Time.timeScale = 0f;
                 SettingsButton.SetActive(false);
+                if (ApplicationVariables.ActualState == "ExerciseDemo")
+                {
+                    TutorialVideo.Pause();
+                }
             }
             else
             {
                 Time.timeScale = 1f;
                 SettingsButton.SetActive(true);
+                if (ApplicationVariables.ActualState == "ExerciseDemo")
+                {
+                    TutorialVideo.Play();
+                }
             }
 
             CheckRepsCompleted();
@@ -264,11 +277,17 @@ public class GameManager : MonoBehaviour
                     float angleDiff = Mathf.Abs(angle - angleTarget);
 
                     if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                    {
                         landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                    }
                     else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                    {
                         landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                    }
                     else
+                    {
                         landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                    }
                 }
             }
         }

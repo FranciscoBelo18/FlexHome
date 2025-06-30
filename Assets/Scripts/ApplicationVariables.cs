@@ -7,7 +7,6 @@ using UnityEngine;
 public static class ApplicationVariables
 {
     public static string SceneToLoad = "";
-    public static string userLoggedID = "";
     public static string userLoggedName = "";
     public static string TypeOfExercises = "";
     public static int PointsEarned = 0;
@@ -16,13 +15,12 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 5;
-    public static float TimeToDisplayExerciseDemo = 2;
+    public static float TimeLimitToCompleteExercise = 25;
+    public static float TimeToDisplayExerciseDemo = 20;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
     public static int GoodPerformanceRange = 35;
     public static int AveragePerformanceRange = 70;
     public static int BadPerformanceRange = 100;
-    public static int BasePoseKneeAngle = 180;
     public static int RepsCompleted = 0;
     public static int DesiredReps = 12;
     public static int LowestGoalPoints = 50;

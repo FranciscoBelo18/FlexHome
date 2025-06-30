@@ -42,7 +42,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Gym/LoadingScene.unity
     guid: ca55f3131a03df14fa5114ae5a58e7d5
   - enabled: 1
-    path: Assets/Scenes/Gym/ProfileScene.unity
+    path: Assets/Scenes/Gym/SettingsScene.unity
     guid: 3d437b2b97a9e7c42a58251637df17d0
   - enabled: 0
     path: Assets/Scenes/Gym/SelectVersionScene.unity
