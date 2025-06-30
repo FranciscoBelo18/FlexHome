@@ -82162,6 +82162,8 @@ MonoBehaviour:
   activeLegObject: {fileID: 1994620038}
   leaderboardManager: {fileID: 1105586365}
   LeaderboardText: {fileID: 944711309}
+  SettingsButton: {fileID: 1979031246}
+  SettingsPopUp: {fileID: 641579392}
 --- !u!4 &1066505084
 Transform:
   m_ObjectHideFlags: 0

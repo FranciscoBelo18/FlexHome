@@ -24,11 +24,11 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        if (isPaused)
+        /*if (isPaused)
         {
             Debug.LogWarning("Timer está pausado no update");
             return;
-        }
+        }*/
 
         time -= Time.deltaTime;
         time = Mathf.Max(0, time);
@@ -75,7 +75,7 @@ public class Timer : MonoBehaviour
             ApplicationVariables.ActualState = "ExerciseDemo";
         }
     }
-    public void PauseTimer()
+    /*public void PauseTimer()
     {
         Debug.LogWarning("Timer pausado");
         isPaused = true;
@@ -85,7 +85,7 @@ public class Timer : MonoBehaviour
     {
         Debug.LogWarning("Timer retomado");
         isPaused = false;
-    }
+    }*/
 
     public void ForceEndTimer()
     {

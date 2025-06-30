@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
     public LeaderboardManager leaderboardManager;
     public TextMeshProUGUI LeaderboardText;
     private AudioSource audioSource;
+    public GameObject SettingsButton;
+    public GameObject SettingsPopUp;
 
     void Start()
     {
@@ -126,6 +128,17 @@ public class GameManager : MonoBehaviour
                 }*/
                 AnalyzePose();
             }
+            if (SettingsPopUp.activeSelf)
+            {
+                Time.timeScale = 0f;
+                SettingsButton.SetActive(false);
+            }
+            else
+            {
+                Time.timeScale = 1f;
+                SettingsButton.SetActive(true);
+            }
+
             CheckRepsCompleted();
         }
         else
@@ -137,6 +150,7 @@ public class GameManager : MonoBehaviour
                 DemoVideoDisplay.SetActive(false);
                 gamePhaseTextObj.SetActive(false);
                 exTextObj.SetActive(false);
+                SettingsButton.SetActive(false);
                 PopUpExercisesCompleted.SetActive(true);
                 DisplayResultsOnPopup();
             }
