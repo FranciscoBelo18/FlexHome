@@ -26,25 +26,26 @@ public class GameManager : MonoBehaviour
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
     private List<ExerciseData> selectedExercises = new List<ExerciseData>();
-    private int[] KneesJoints = new int[] { 25, 26 };
     public PointsSystem pointsSystem;
     public TextMeshPro totalPointsText;
     private int swapCounter = 0;
-    public TextMeshProUGUI timerText;
     public GameObject[] StrikeThroughLines;
     private Dictionary<string, int> ExerciseResults = new Dictionary<string, int>();
     public TextMeshProUGUI ExerciseResultsText;
     public TextMeshProUGUI TotalPointsText;
-    private bool isInFinalPosition = false;
     private bool isWaitingForBaseReturn = false;
     public GameObject ScreenDisplay;
     public Timer timer;
     private bool isTimerPausedByOutOfBounds = false;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
+    public LeaderboardManager leaderboardManager;
+    public TextMeshProUGUI LeaderboardText;
+    private AudioSource audioSource;
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
         Debug.Log("Type of exercises: " + ApplicationVariables.TypeOfExercises);
         Debug.Log("Game version: " + ApplicationVariables.GameVersion);
@@ -265,10 +266,11 @@ public class GameManager : MonoBehaviour
     {
         bool allGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green);
 
-        if (allGreen && !isInFinalPosition && !isWaitingForBaseReturn)
+        if (allGreen && !isWaitingForBaseReturn)
         {
-            isInFinalPosition = true;
             isWaitingForBaseReturn = true;
+
+            audioSource.Play();
 
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
@@ -282,12 +284,12 @@ public class GameManager : MonoBehaviour
                 {
                     SwapLegs();
                     ChangeActiveLegText();
-                    isInFinalPosition = false;
-                    isWaitingForBaseReturn = false;
+                    isWaitingForBaseReturn = false; // ← apenas aqui para unilateral
                 }
             }
         }
     }
+
 
     private void ChangeActiveLegText()
     {
@@ -306,63 +308,24 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
     {
-        bool leftFinalPosition = false;
-        bool reachedBase = false;
-
-        // Etapa 1: Espera o usuário sair da posição final (agachada)
-        while (!leftFinalPosition)
+        // Aguarda enquanto o jogador ainda está na pose (todos os pontos estão verdes)
+        while (activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green))
         {
-            bool anyNotGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green);
-
-            if (anyNotGreen)
-            {
-                leftFinalPosition = true;
-            }
-
-            yield return new WaitForSeconds(0.1f);
+            yield return null;
         }
 
-        while (!reachedBase)
+        // Aguarda até que o jogador tenha retornado à base (nenhum ponto mais verde)
+        while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
         {
-            bool kneesAtBase = true;
-
-            foreach (var kneeJoint in KneesJoints)
-            {
-                float kneeAngle = jointAngleCalculation.CalculateAngle(ApplicationVariables.JointGroupsFromPlayfab[kneeJoint], landmarkPoints);
-
-                float angleDiff = Mathf.Abs(kneeAngle - ApplicationVariables.BasePoseKneeAngle);
-
-                if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.green;
-                }
-                else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                    kneesAtBase = false;
-                }
-                else
-                {
-                    landmarkPoints[kneeJoint].GetComponent<Renderer>().material.color = Color.red;
-                    kneesAtBase = false;
-                }
-            }
-
-            if (kneesAtBase)
-            {
-                reachedBase = true;
-            }
-
-            yield return new WaitForSeconds(0.1f);
+            yield return null;
         }
 
+        // Agora sim: pose concluída e retorno à base detectado
         pointsSystem.AddPointsRepCompleted();
         ApplicationVariables.RepsCompleted++;
 
-        isInFinalPosition = false;
         isWaitingForBaseReturn = false;
     }
-
 
     private void SwapLegs()
     {
@@ -469,15 +432,50 @@ public class GameManager : MonoBehaviour
 
     private void DisplayResultsOnPopup()
     {
+        var actualType = ApplicationVariables.TypeOfExercises;
         int index = 1;
         ExerciseResultsText.text = "";
+
         foreach (var result in ExerciseResults)
         {
             ExerciseResultsText.text += index + ") " + result.Key + ": " + result.Value + " reps\n";
             index++;
         }
 
-        TotalPointsText.text = "Total Points: " + pointsSystem.GetPointsEarned();
+        TotalPointsText.text = pointsSystem.GetPointsEarned().ToString();
+
+        if (leaderboardManager != null)
+        {
+            if (pointsSystem.GetPointsEarned() > 0)
+            {
+                leaderboardManager.SendToLeaderboard(actualType, pointsSystem.GetPointsEarned());
+            }
+
+            LeaderboardText.text = "";
+
+            // Espera 2 segundos antes de buscar
+            StartCoroutine(WaitThenGetLeaderboard(actualType));
+        }
+    }
+
+    private IEnumerator WaitThenGetLeaderboard(string leaderboardName)
+    {
+        yield return new WaitForSeconds(1f); // tempo para o PlayFab propagar a atualização
+
+        leaderboardManager.GetLeaderboard(leaderboardName, () =>
+        {
+            StartCoroutine(DisplayLeaderboardResults());
+        });
+    }
+
+    private IEnumerator DisplayLeaderboardResults()
+    {
+        yield return null;
+
+        foreach (var entry in ApplicationVariables.LeaderboardResults)
+        {
+            LeaderboardText.text += entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points\n";
+        }
     }
 
     private bool AreAllLandmarksInsideScreenDisplay()

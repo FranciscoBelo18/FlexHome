@@ -16,8 +16,8 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 10;
-    public static float TimeToDisplayExerciseDemo = 10;
+    public static float TimeLimitToCompleteExercise = 5;
+    public static float TimeToDisplayExerciseDemo = 2;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
     public static int GoodPerformanceRange = 35;
     public static int AveragePerformanceRange = 70;
@@ -29,5 +29,13 @@ public static class ApplicationVariables
     public static int MediumGoalPoints = 75;
     public static int HighestGoalPoints = 150;
     public static int LowestRepsGoal = 8;
-    public static int MediumRepsGoal = 10;    
+    public static int MediumRepsGoal = 10;
+    public static int maxResultsToDisplayLeaderboard = 5; 
+    public class LeaderboardEntry
+    {
+        public string DisplayName;
+        public int Position;
+        public int Score;
+    }
+    public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>(); 
 }

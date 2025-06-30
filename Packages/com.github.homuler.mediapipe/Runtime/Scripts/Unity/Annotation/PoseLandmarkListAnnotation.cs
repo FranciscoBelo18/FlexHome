@@ -234,7 +234,7 @@ namespace Mediapipe.Unity
         }
 
         // Desativar pés
-        if (i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
+        if (i==11 || i==12 ||i==13 || i== 14 || i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
         {
           isActive = false;
         }

@@ -50,6 +50,7 @@ public class PlayfabAuth : MonoBehaviour
     {
         Debug.Log("Registration successful: " + result.PlayFabId);
         ApplicationVariables.userLoggedID = result.PlayFabId;
+        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
         ApplicationVariables.SceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");
     }
