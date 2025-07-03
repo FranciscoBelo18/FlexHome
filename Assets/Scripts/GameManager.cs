@@ -513,37 +513,6 @@ public class GameManager : MonoBehaviour
 
     private bool AreAllLandmarksInsideScreenDisplay()
     {
-        if (ScreenDisplay == null || landmarkPoints == null || landmarkPoints.Length == 0)
-            return false;
-
-        RectTransform screenRect = ScreenDisplay.GetComponent<RectTransform>();
-        if (screenRect == null)
-        {
-            Debug.LogWarning("ScreenDisplay does not have a RectTransform.");
-            return false;
-        }
-
-        foreach (var point in landmarkPoints)
-        {
-            if (point == null) continue;
-
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(point.transform.position);
-
-            if (screenPos.z < 0)
-                return false;
-
-            Vector2 localPoint;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                screenRect,
-                screenPos,
-                Camera.main,
-                out localPoint
-            );
-
-            if (!screenRect.rect.Contains(localPoint))
-                return false;
-        }
-
         return true;
     }
 

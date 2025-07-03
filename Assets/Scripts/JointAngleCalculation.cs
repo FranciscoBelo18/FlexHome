@@ -67,4 +67,9 @@ public class JointAngleCalculation : MonoBehaviour
 
         return angle;
     }
+
+    public void CreateRepresentativeJointToMatchIdealAngle (int jointId, float idealAngle, GameObject[] landmarkPoints)
+    {
+        return;
+    }
 }
