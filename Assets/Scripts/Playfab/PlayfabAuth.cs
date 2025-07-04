@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class PlayfabAuth : MonoBehaviour
 {
-
     public TMP_InputField usernameRegister;
     public TMP_InputField passwordRegister;
     public TMP_InputField repeatPasswordRegister;
@@ -32,9 +31,6 @@ public class PlayfabAuth : MonoBehaviour
             return;
         }
 
-        Debug.Log("Registering user: " + user);
-        Debug.Log("Password: " + pass);
-
         var request = new RegisterPlayFabUserRequest
         {
             Username = user,
@@ -49,14 +45,18 @@ public class PlayfabAuth : MonoBehaviour
     private void OnRegisterSuccess(RegisterPlayFabUserResult result)
     {
         Debug.Log("Registration successful: " + result.PlayFabId);
-        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
+
+        // Agora o utilizador está autenticado, podemos guardar os dados
+        SaveDefaultUserSettings();
+
+        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);  // Se necessário
         ApplicationVariables.SceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");
     }
 
     private void OnRegisterError(PlayFabError error)
     {
-        Debug.Log("Registration failed: " + error.GenerateErrorReport());
+        Debug.LogError("Registration failed: " + error.GenerateErrorReport());
     }
 
     public void LoginButton()
@@ -82,15 +82,44 @@ public class PlayfabAuth : MonoBehaviour
     private void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Login successful: " + result.PlayFabId);
-        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);
+
+        PlayfabUserManager.GetUserDataFromID(result.PlayFabId);  // Se necessário
         ApplicationVariables.SceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");
     }
 
     private void OnLoginError(PlayFabError error)
     {
-        Debug.Log("Login failed: " + error.GenerateErrorReport());
+        Debug.LogError("Login failed: " + error.GenerateErrorReport());
     }
-    
 
+    private Dictionary<string, string> GetDefaultSettings()
+    {
+        return new Dictionary<string, string>
+        {
+            { "Background Music", "true" },
+            { "Rep Completed Sound", "true" },
+            { "Clock Ticking Sound", "true" }
+        };
+    }
+
+    private void SaveDefaultUserSettings()
+    {
+        var request = new UpdateUserDataRequest
+        {
+            Data = GetDefaultSettings()
+        };
+
+        PlayFabClientAPI.UpdateUserData(request, OnUpdateUserDataSuccess, OnUpdateUserDataError);
+    }
+
+    private void OnUpdateUserDataSuccess(UpdateUserDataResult result)
+    {
+        Debug.Log("Default user settings saved successfully.");
+    }
+
+    private void OnUpdateUserDataError(PlayFabError error)
+    {
+        Debug.LogError("Failed to save default user settings: " + error.GenerateErrorReport());
+    }
 }

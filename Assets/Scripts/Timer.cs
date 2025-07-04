@@ -9,11 +9,13 @@ public class Timer : MonoBehaviour
     public TextMeshProUGUI timerText;
     private float initialTime;
     private bool isPaused = false;
+    private AudioSource audioSource;
 
     void Start()
     {
         SetInitialTime();
         ResetTimerVisuals();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnEnable()
