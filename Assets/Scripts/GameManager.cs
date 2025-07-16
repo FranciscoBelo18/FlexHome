@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     public GameObject SettingsPopUp;
     public VideoPlayer TutorialVideo;
     public GameObject PopUpWarningOutOfBounds;
+    public AudioSource backgroundAudio;
 
     void Start()
     {
@@ -303,7 +304,7 @@ public class GameManager : MonoBehaviour
         {
             isWaitingForBaseReturn = true;
 
-            audioSource.Play();
+            StartCoroutine(PlaySoundWithBackgroundDucking());
 
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
@@ -317,12 +318,21 @@ public class GameManager : MonoBehaviour
                 {
                     SwapLegs();
                     ChangeActiveLegText();
-                    isWaitingForBaseReturn = false; // ← apenas aqui para unilateral
+                    isWaitingForBaseReturn = false;
                 }
             }
         }
     }
 
+    private IEnumerator PlaySoundWithBackgroundDucking()
+    {
+        backgroundAudio.volume = 0.1f;
+
+        audioSource.Play();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+
+        backgroundAudio.volume = 1f;
+    }
 
     private void ChangeActiveLegText()
     {
