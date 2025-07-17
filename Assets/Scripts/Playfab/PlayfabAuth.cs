@@ -5,6 +5,7 @@ using PlayFab.ClientModels;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json;
 
 public class PlayfabAuth : MonoBehaviour
 {
@@ -93,13 +94,20 @@ public class PlayfabAuth : MonoBehaviour
         Debug.LogError("Login failed: " + error.GenerateErrorReport());
     }
 
-    private Dictionary<string, string> GetDefaultSettings()
+    private Dictionary<string, string> DefaultSettings()
     {
+        var audioSettings = new Dictionary<string, bool>
+        {
+            { "Background Music", true },
+            { "Exercise Rep Completed", true },
+            { "Clock Ticking", true }
+        };
+
+        string audioJson = JsonConvert.SerializeObject(audioSettings);
+
         return new Dictionary<string, string>
         {
-            { "Background Music", "true" },
-            { "Rep Completed Sound", "true" },
-            { "Clock Ticking Sound", "true" }
+            { "AudioSettings", audioJson }
         };
     }
 
@@ -107,7 +115,7 @@ public class PlayfabAuth : MonoBehaviour
     {
         var request = new UpdateUserDataRequest
         {
-            Data = GetDefaultSettings()
+            Data = DefaultSettings()
         };
 
         PlayFabClientAPI.UpdateUserData(request, OnUpdateUserDataSuccess, OnUpdateUserDataError);

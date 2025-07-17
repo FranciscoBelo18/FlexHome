@@ -28,12 +28,13 @@ public static class ApplicationVariables
     public static int HighestGoalPoints = 150;
     public static int LowestRepsGoal = 8;
     public static int MediumRepsGoal = 10;
-    public static int maxResultsToDisplayLeaderboard = 5; 
+    public static int maxResultsToDisplayLeaderboard = 5;
     public class LeaderboardEntry
     {
         public string DisplayName;
         public int Position;
         public int Score;
     }
-    public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>(); 
+    public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>();
+    public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
 }

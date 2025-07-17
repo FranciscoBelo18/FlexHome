@@ -329,6 +329,8 @@ public class GameManager : MonoBehaviour
         backgroundAudio.volume = 0.1f;
 
         audioSource.Play();
+
+        //o waitwhile espera até a codição da função ser falsa
         yield return new WaitWhile(() => audioSource.isPlaying);
 
         backgroundAudio.volume = 1f;
