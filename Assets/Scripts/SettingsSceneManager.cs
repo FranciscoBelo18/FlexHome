@@ -4,7 +4,7 @@ using PlayFab.ClientModels;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-public class SettingsManager : MonoBehaviour
+public class SettingsSceneManager : MonoBehaviour
 {
     public GameObject[] AudioSettingsToggles;
     public GameObject PopUpSaveSettings;
@@ -78,8 +78,11 @@ public class SettingsManager : MonoBehaviour
     private void OnUpdateUserDataSuccess(UpdateUserDataResult result)
     {
         Debug.Log("User data updated successfully.");
-        PopUpSaveSettings.SetActive(true);
-        Invoke("ClosePopUp", 2f);
+        if (PopUpSaveSettings != null)
+        {
+            PopUpSaveSettings.SetActive(true);
+            Invoke("ClosePopUp", 2f); 
+        }
     }
 
     private void OnUpdateUserDataError(PlayFabError error)

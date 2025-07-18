@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     public GameObject activeLegObject;
     public LeaderboardManager leaderboardManager;
     public TextMeshProUGUI LeaderboardText;
-    private AudioSource audioSource;
+    private AudioSource RepCompletedAudio;
     public GameObject SettingsButton;
     public GameObject SettingsPopUp;
     public VideoPlayer TutorialVideo;
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        RepCompletedAudio = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
         Debug.Log("Type of exercises: " + ApplicationVariables.TypeOfExercises);
         Debug.Log("Game version: " + ApplicationVariables.GameVersion);
@@ -64,6 +64,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        AnalyzeSettings(RepCompletedAudio, backgroundAudio);
+        
         if (totalPointsText != null)
         {
             totalPointsText.text = "Total Points: " + ApplicationVariables.PointsEarned;
@@ -89,7 +91,7 @@ public class GameManager : MonoBehaviour
                 }
 
                 var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
-               
+
                 if (currentExerciseData != null && !currentExerciseData.together)
                 {
                     activeLegObject.SetActive(true);
@@ -304,7 +306,7 @@ public class GameManager : MonoBehaviour
         {
             isWaitingForBaseReturn = true;
 
-            StartCoroutine(PlaySoundWithBackgroundDucking());
+            StartCoroutine(PlaySoundWithBackground());
 
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
@@ -324,16 +326,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator PlaySoundWithBackgroundDucking()
+    private IEnumerator PlaySoundWithBackground()
     {
-        backgroundAudio.volume = 0.1f;
+        if (!backgroundAudio.mute && !RepCompletedAudio.mute)
+        {
+            backgroundAudio.volume = 0.1f;
 
-        audioSource.Play();
+            RepCompletedAudio.Play();
 
-        //o waitwhile espera até a codição da função ser falsa
-        yield return new WaitWhile(() => audioSource.isPlaying);
+            //o waitwhile espera até a codição da função ser falsa
+            yield return new WaitWhile(() => RepCompletedAudio.isPlaying);
 
-        backgroundAudio.volume = 1f;
+            backgroundAudio.volume = 1f;
+        }
+        else if (backgroundAudio.mute && !RepCompletedAudio.mute)
+        {
+            RepCompletedAudio.Play();
+            yield return new WaitWhile(() => RepCompletedAudio.isPlaying);
+        }
     }
 
     private void ChangeActiveLegText()
@@ -526,6 +536,28 @@ public class GameManager : MonoBehaviour
     private bool AreAllLandmarksInsideScreenDisplay()
     {
         return true;
+    }
+
+    private void AnalyzeSettings(AudioSource RepCompleted, AudioSource background)
+    {
+        foreach (var setting in ApplicationVariables.AudioSettings)
+        {
+            switch (setting.Key)
+            {
+                case "Background Music":
+                    background.mute = !setting.Value;
+                    break;
+                case "Exercise Rep Completed":
+                    RepCompleted.mute = !setting.Value;
+                    break;
+                case "Clock Ticking":
+                    //ainda por implementar este som, e se for necessário
+                    break;
+                default:
+                    Debug.LogWarning("Unknown audio setting: " + setting.Key);
+                    break;
+            }
+        }  
     }
 
 }
