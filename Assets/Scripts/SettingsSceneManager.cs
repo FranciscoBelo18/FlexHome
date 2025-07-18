@@ -78,11 +78,8 @@ public class SettingsSceneManager : MonoBehaviour
     private void OnUpdateUserDataSuccess(UpdateUserDataResult result)
     {
         Debug.Log("User data updated successfully.");
-        if (PopUpSaveSettings != null)
-        {
-            PopUpSaveSettings.SetActive(true);
-            Invoke("ClosePopUp", 2f); 
-        }
+        PopUpSaveSettings.SetActive(true);
+        Invoke("ClosePopUp", 2f); 
     }
 
     private void OnUpdateUserDataError(PlayFabError error)
