@@ -60,10 +60,10 @@ public class JointAngleCalculation : MonoBehaviour
         Vector3 jointB = landmarkPoints[jointsToCalculate[1]].transform.position;
         Vector3 jointC = landmarkPoints[jointsToCalculate[2]].transform.position;
 
-        Vector3 vectorAB = jointB - jointA;
-        Vector3 vectorBC = jointC - jointB;
+        Vector3 vectorAB = jointA - jointB;
+        Vector3 vectorCB = jointC - jointB;
 
-        float angle = Vector3.Angle(vectorAB, vectorBC);
+        float angle = Vector3.Angle(vectorAB, vectorCB);
 
         return angle;
     }
