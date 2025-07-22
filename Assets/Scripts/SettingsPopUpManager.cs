@@ -24,14 +24,14 @@ public class SettingsPopUpManager : MonoBehaviour
 
         foreach (var obj in AudioSettingsObjects)
         {
-            string toggleTag = obj.tag;
+            string SettingGroup = obj.tag;
 
             var toggleComponent = obj.GetComponentInChildren<UnityEngine.UI.Toggle>();
             var labelText = obj.GetComponentInChildren<TMPro.TMP_Text>();
 
-            if (result.Data != null && result.Data.ContainsKey(toggleTag))
+            if (result.Data != null && result.Data.ContainsKey(SettingGroup))
             {
-                var resultJson = result.Data[toggleTag].Value;
+                var resultJson = result.Data[SettingGroup].Value;
 
                 Dictionary<string, bool> settings = JsonConvert.DeserializeObject<Dictionary<string, bool>>(resultJson);
 
@@ -48,7 +48,7 @@ public class SettingsPopUpManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Nenhum dado encontrado para a chave: " + toggleTag);
+                Debug.LogWarning("Nenhum dado encontrado para a chave: " + SettingGroup);
             }
         }
     }
@@ -57,6 +57,40 @@ public class SettingsPopUpManager : MonoBehaviour
     private void OnGetUserDataError(PlayFabError error)
     {
         Debug.LogError("Failed to retrieve user data: " + error.GenerateErrorReport());
+    }
+
+    public void SavePlayerData()
+    {
+        Dictionary<string, bool> audioSettings = new Dictionary<string, bool>();
+
+        foreach (var obj in AudioSettingsObjects)
+        {
+            var toggleComponent = obj.GetComponentInChildren<UnityEngine.UI.Toggle>();
+            var labelText = obj.GetComponentInChildren<TMPro.TMP_Text>();
+
+            if (toggleComponent != null && labelText != null)
+            {
+                audioSettings[labelText.text] = toggleComponent.isOn;
+                Debug.Log("Configuração salva: " + labelText.text + " = " + toggleComponent.isOn);
+            }
+        }
+
+        string jsonSettings = JsonConvert.SerializeObject(audioSettings);
+        
+        PlayFabClientAPI.UpdateUserData(new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string> { { "AudioSettings", jsonSettings } }
+        }, OnUpdateUserDataSuccess, OnUpdateUserDataError);
+    }
+
+    private void OnUpdateUserDataSuccess(UpdateUserDataResult result)
+    {
+        Debug.Log("User data updated successfully.");
+    }
+
+    private void OnUpdateUserDataError(PlayFabError error)
+    {
+        Debug.LogError("Failed to update user data: " + error.GenerateErrorReport());
     }
 }
 

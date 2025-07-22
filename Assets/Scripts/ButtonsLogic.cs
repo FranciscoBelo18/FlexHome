@@ -152,4 +152,12 @@ public class ButtonsLogic : MonoBehaviour
         ApplicationVariables.SceneToLoad = "AuthenticationScene";
         SceneManager.LoadScene("LoadingScene");
     }
+
+    public void RestartLevel()
+    {
+        if (ApplicationVariables.SceneToLoad == "GymScene")
+        { 
+            SceneManager.LoadScene("LoadingScene");
+        }
+    }
 }
