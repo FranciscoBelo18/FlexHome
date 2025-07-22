@@ -75,6 +75,8 @@ public class SettingsPopUpManager : MonoBehaviour
             }
         }
 
+        ApplicationVariables.AudioSettings = audioSettings;
+
         string jsonSettings = JsonConvert.SerializeObject(audioSettings);
         
         PlayFabClientAPI.UpdateUserData(new UpdateUserDataRequest
