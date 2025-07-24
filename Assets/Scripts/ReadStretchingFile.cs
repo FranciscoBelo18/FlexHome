@@ -4,16 +4,7 @@ using System.Collections.Generic;
 
 public class ReadStretchingFile : MonoBehaviour
 {
-    private string filePath = @"C:\Users\user\Documents\MediaPipe\AnglesDB.txt";
-
-    void Start()
-    {
-        /*SortedDictionary<int, int> result = ReadFile("Squats");
-        foreach (KeyValuePair<int, int> kvp in result)
-        {
-            Debug.Log("Joint: " + kvp.Key + ", Angle: " + kvp.Value);
-        }*/
-    }
+    private string filePath = Path.Combine(Application.streamingAssetsPath, "AnglesDB.txt");
 
     public SortedDictionary<int, int> ReadFile(string ExerciseName)
     {
