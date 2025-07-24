@@ -22,6 +22,7 @@ public class LeaderboardManager : MonoBehaviour
                 new StatisticUpdate
                 {
                     StatisticName = leaderboardName,
+                    //Version = ApplicationVariables.GameVersion,
                     Value = score
                 }
             }
@@ -36,12 +37,10 @@ public class LeaderboardManager : MonoBehaviour
             error =>
             {
                 Debug.LogError("Failed to update leaderboard: " + error.GenerateErrorReport());
-                onSuccess?.Invoke(); // mesmo se falhar, pode seguir
+                onSuccess?.Invoke();
             });
     }
 
-
-    // ADAPTADO: Agora aceita um callback opcional
     public void GetLeaderboard(string leaderboardName, Action onComplete = null)
     {
         var request = new GetLeaderboardRequest
@@ -56,7 +55,6 @@ public class LeaderboardManager : MonoBehaviour
         );
     }
 
-    // ADAPTADO: Agora aceita callback
     private void OnGetLeaderboardSuccess(GetLeaderboardResult result, Action onComplete)
     {
         Debug.Log("Leaderboard retrieved successfully.");
@@ -77,10 +75,8 @@ public class LeaderboardManager : MonoBehaviour
             });
         }
 
-        onComplete?.Invoke(); // Chama callback se existir
+        onComplete?.Invoke();
     }
-
-    // ADAPTADO: Também chama callback mesmo em erro
     private void OnGetLeaderboardError(PlayFabError error, Action onComplete)
     {
         Debug.LogError("Failed to retrieve leaderboard: " + error.GenerateErrorReport());

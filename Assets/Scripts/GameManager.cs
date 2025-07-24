@@ -8,6 +8,7 @@ using System.Linq;
 using TMPro;
 using System.Collections;
 using UnityEngine.Video;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -47,8 +48,9 @@ public class GameManager : MonoBehaviour
     public VideoPlayer TutorialVideo;
     public GameObject PopUpWarningOutOfBounds;
     public AudioSource backgroundAudio;
+    public Camera uiCamera;
 
-    void Start()
+        void Start()
     {
         RepCompletedAudio = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
@@ -114,23 +116,18 @@ public class GameManager : MonoBehaviour
                 UserPoseDisplay.SetActive(true);
                 DemoVideoDisplay.SetActive(false);
                 StartCoroutine(CacheLandmarkPointsWhenReady());
-                /*if (AreAllLandmarksInsideScreenDisplay())
+                if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                 {
-                    if (isTimerPausedByOutOfBounds)
-                    {
-                        isTimerPausedByOutOfBounds = false;
-                        timer.ResumeTimer();
-                    }
-                    AnalyzePose();
+                    Debug.Log("Some essential points are out of bounds of the RawImage.");
+                    PopUpWarningOutOfBounds.SetActive(true);
+                    timer.PauseTimer();
                 }
                 else
                 {
-                    if (!isTimerPausedByOutOfBounds)
-                    {
-                        isTimerPausedByOutOfBounds = true;
-                        timer.PauseTimer();
-                    }
-                }*/
+                    PopUpWarningOutOfBounds.SetActive(false);
+                    timer.ResumeTimer();
+                }
+
                 if (!timer.IsTimerPaused())
                 {
                     AnalyzePose();
@@ -488,6 +485,9 @@ public class GameManager : MonoBehaviour
     private void DisplayResultsOnPopup()
     {
         var actualType = ApplicationVariables.TypeOfExercises;
+        var actualVersion = ApplicationVariables.GameVersion;
+        string leaderboardName = actualType + actualVersion;
+        
         int index = 1;
         ExerciseResultsText.text = "";
 
@@ -503,13 +503,13 @@ public class GameManager : MonoBehaviour
         {
             if (pointsSystem.GetPointsEarned() > 0)
             {
-                leaderboardManager.SendToLeaderboard(actualType, pointsSystem.GetPointsEarned());
+                leaderboardManager.SendToLeaderboard(leaderboardName, pointsSystem.GetPointsEarned());
             }
 
             LeaderboardText.text = "";
 
             // Espera 2 segundos antes de buscar
-            StartCoroutine(WaitThenGetLeaderboard(actualType));
+            StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
         }
     }
 
@@ -533,10 +533,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private bool AreAllLandmarksInsideScreenDisplay()
+    private bool AreEssentialPointsInsideRawImage(RectTransform rawImageRect, GameObject[] landmarkPoints, Camera uiCamera)
     {
+        int[] essentialPoints = { 0, 11, 12, 15, 16, 27, 28 };
+
+        foreach (int index in essentialPoints)
+        {
+            if (index >= landmarkPoints.Length || landmarkPoints[index] == null || !landmarkPoints[index].activeInHierarchy)
+            {
+                Debug.LogWarning("Essential point " + index + " is not available or not active in the scene.");
+                return false;
+            }
+
+            Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(uiCamera, landmarkPoints[index].transform.position);
+
+            if (!IsPointInsideRawImage(rawImageRect, screenPos))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
+
+    private bool IsPointInsideRawImage(RectTransform rect, Vector3 screenPos)
+    {
+        return RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPos, uiCamera, out Vector2 localPoint) && rect.rect.Contains(localPoint);
+    }
+
+
 
     private void AnalyzeSettings(AudioSource RepCompleted, AudioSource background)
     {
