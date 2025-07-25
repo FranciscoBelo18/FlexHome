@@ -14,6 +14,9 @@ public class PlayfabAuth : MonoBehaviour
     public TMP_InputField repeatPasswordRegister;
     public TMP_InputField usernameLogin;
     public TMP_InputField passwordLogin;
+    public TMP_Text validationText;
+    public GameObject validationMessagePopup;
+    private bool AuthSuccess = false;
 
     public void RegisterButton()
     {
@@ -24,11 +27,17 @@ public class PlayfabAuth : MonoBehaviour
         if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass) || string.IsNullOrEmpty(repeatPass))
         {
             Debug.Log("Username or Password is empty");
+            validationText.text = "Username or Password is empty!";
+            validationMessagePopup.SetActive(true);
+            Invoke(nameof(DisableValidationMessageObject), 2f);
             return;
         }
         else if (pass != repeatPass)
         {
             Debug.Log("Passwords do not match");
+            validationText.text = "Passwords do not match!";
+            validationMessagePopup.SetActive(true);
+            Invoke(nameof(DisableValidationMessageObject), 2f);
             return;
         }
 
@@ -45,19 +54,26 @@ public class PlayfabAuth : MonoBehaviour
 
     private void OnRegisterSuccess(RegisterPlayFabUserResult result)
     {
+        AuthSuccess = true;
         Debug.Log("Registration successful: " + result.PlayFabId);
 
-        // Agora o utilizador está autenticado, podemos guardar os dados
         SaveDefaultUserSettings();
 
         PlayfabUserManager.GetUserDataFromID(result.PlayFabId);  // Se necessário
         ApplicationVariables.SceneToLoad = "MainMenu";
-        SceneManager.LoadScene("LoadingScene");
+
+        validationText.text = "Registration successful!";
+        validationMessagePopup.SetActive(true);
+
+        Invoke(nameof(DisableValidationMessageObject), 2f);
     }
 
     private void OnRegisterError(PlayFabError error)
     {
         Debug.LogError("Registration failed: " + error.GenerateErrorReport());
+        validationText.text = "Registration failed!";
+        validationMessagePopup.SetActive(true);
+        Invoke(nameof(DisableValidationMessageObject), 2f);
     }
 
     public void LoginButton()
@@ -68,6 +84,9 @@ public class PlayfabAuth : MonoBehaviour
         if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
         {
             Debug.Log("Username or Password is empty");
+            validationText.text = "Username or Password is empty!";
+            validationMessagePopup.SetActive(true);
+            Invoke(nameof(DisableValidationMessageObject), 2f);
             return;
         }
 
@@ -82,16 +101,24 @@ public class PlayfabAuth : MonoBehaviour
 
     private void OnLoginSuccess(LoginResult result)
     {
+        AuthSuccess = true;
         Debug.Log("Login successful: " + result.PlayFabId);
 
         PlayfabUserManager.GetUserDataFromID(result.PlayFabId);  // Se necessário
         ApplicationVariables.SceneToLoad = "MainMenu";
-        SceneManager.LoadScene("LoadingScene");
+        
+
+        validationText.text = "Login successful!";
+        validationMessagePopup.SetActive(true);
+        Invoke(nameof(DisableValidationMessageObject), 2f);
     }
 
     private void OnLoginError(PlayFabError error)
     {
         Debug.LogError("Login failed: " + error.GenerateErrorReport());
+        validationText.text = "Login failed! Username and/or password incorrect.";
+        validationMessagePopup.SetActive(true);
+        Invoke(nameof(DisableValidationMessageObject), 2f);
     }
 
     private Dictionary<string, string> DefaultSettings()
@@ -129,5 +156,17 @@ public class PlayfabAuth : MonoBehaviour
     private void OnUpdateUserDataError(PlayFabError error)
     {
         Debug.LogError("Failed to save default user settings: " + error.GenerateErrorReport());
+    }
+
+    private void DisableValidationMessageObject()
+    {
+        validationText.text = "";
+        validationMessagePopup.SetActive(false);
+
+        if (AuthSuccess)
+        {
+            AuthSuccess = false;
+            SceneManager.LoadScene("LoadingScene");
+        }
     }
 }
