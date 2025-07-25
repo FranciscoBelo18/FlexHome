@@ -50,8 +50,13 @@ public class GameManager : MonoBehaviour
     public AudioSource backgroundAudio;
     public Camera uiCamera;
 
-        void Start()
+    void Start()
     {
+        if (ApplicationVariables.StartWithTutorial)
+        {
+            return;
+        }
+
         RepCompletedAudio = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
         Debug.Log("Type of exercises: " + ApplicationVariables.TypeOfExercises);
@@ -66,6 +71,10 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (ApplicationVariables.StartWithTutorial)
+        {
+            return;
+        }
         AnalyzeSettings(RepCompletedAudio, backgroundAudio);
         
         if (totalPointsText != null)

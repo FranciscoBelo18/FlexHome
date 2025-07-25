@@ -128,14 +128,15 @@ public class ButtonsLogic : MonoBehaviour
     {
         if (clickedButton.tag == "Tutorial")
         {
+            ApplicationVariables.StartWithTutorial = true;
             PopUpTutorialObject.SetActive(false);
-            //por enquanto nao faz nada, mas depois pode ser usado para mostrar o tutorial
             Time.timeScale = 1f;
             SceneManager.LoadScene("LoadingScene");
 
         }
         else if (clickedButton.tag == "Play")
         {
+            ApplicationVariables.StartWithTutorial = false;
             PopUpTutorialObject.SetActive(false);
             Time.timeScale = 1f;
             SceneManager.LoadScene("LoadingScene");

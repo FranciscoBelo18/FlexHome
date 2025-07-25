@@ -7,6 +7,7 @@ using UnityEngine;
 public static class ApplicationVariables
 {
     public static string SceneToLoad = "";
+    public static bool StartWithTutorial = false;
     public static string userLoggedName = "";
     public static string TypeOfExercises = "";
     public static int PointsEarned = 0;
