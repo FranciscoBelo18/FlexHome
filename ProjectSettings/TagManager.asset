@@ -19,6 +19,10 @@ TagManager:
   - Dynamic
   - Tutorial
   - Play
+  - LowestGoal
+  - MediumGoal
+  - HighestGoal
+  - AudioSettings
   layers:
   - Default
   - TransparentFX

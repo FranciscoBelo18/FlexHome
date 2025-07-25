@@ -92,6 +92,13 @@ config_setting(
 )
 
 config_setting(
+    name = "gesture_recognition_switch",
+    flag_values = {
+        ":solutions": "gesture_recognition",
+    },
+)
+
+config_setting(
     name = "audio_classification_switch",
     flag_values = {
         ":solutions": "audio_classification",
@@ -136,6 +143,11 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "enable_object_detection",
     match_any = [":all_solutions_switch", ":object_detection_switch"],
+)
+
+selects.config_setting_group(
+    name = "enable_gesture_recognition",
+    match_any = [":all_solutions_switch", ":gesture_recognition_switch"],
 )
 
 selects.config_setting_group(
@@ -303,6 +315,9 @@ cc_library(
         ":enable_object_detection": [":object_detection_calculators"],
         "//conditions:default": [],
     }) + select({
+        ":enable_gesture_recognition": [":gesture_recognition_calculators"],
+        "//conditions:default": [],
+    }) + select({
         ":enable_audio_classification": [":audio_classification_calculators"],
         "//conditions:default": [],
     }),
@@ -383,7 +398,9 @@ cc_library(
 
 cc_library(
     name = "holistic_calculators",
-    deps = select({
+    deps = [
+        "@mediapipe//mediapipe/tasks/cc/vision/holistic_landmarker:holistic_landmarker_graph",
+    ] + select({
         "@mediapipe//mediapipe/gpu:disable_gpu": [
             "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
         ],
@@ -425,6 +442,13 @@ cc_library(
 )
 
 cc_library(
+    name = "gesture_recognition_calculators",
+    deps = [
+        "@mediapipe//mediapipe/tasks/cc/vision/gesture_recognizer:gesture_recognizer",
+    ],
+)
+
+cc_library(
     name = "audio_classification_calculators",
     deps = ["@mediapipe//mediapipe/tasks/cc/audio/audio_classifier:audio_classifier"],
 )
@@ -444,8 +468,14 @@ mediapipe_files(srcs = [
     "face_landmarker_v2.task",
     "face_landmarker_v2_with_blendshapes.task",
 
+    # gesture recognizer
+    "gesture_recognizer.task",
+
     # hand landmarker
     "hand_landmarker.task",
+
+    # holistic landmarker
+    "holistic_landmarker.task",
 
     # pose landmarker
     "pose_landmarker_full.task",
@@ -498,6 +528,9 @@ pkg_asset(
         "//conditions:default": [],
     }) + select({
         ":enable_object_detection": [":object_detection_assets"],
+        "//conditions:default": [],
+    }) + select({
+        ":enable_gesture_recognition": [":gesture_recognition_assets"],
         "//conditions:default": [],
     }) + select({
         ":enable_audio_classification": [":audio_classification_assets"],
@@ -563,6 +596,7 @@ filegroup(
 filegroup(
     name = "holistic_assets",
     srcs = [
+        ":holistic_landmarker.task",
         "@mediapipe//mediapipe/modules/face_detection:face_detection_short_range.tflite",
         "@mediapipe//mediapipe/modules/face_landmark:face_landmark.tflite",
         "@mediapipe//mediapipe/modules/face_landmark:face_landmark_with_attention.tflite",
@@ -608,6 +642,13 @@ filegroup(
 )
 
 filegroup(
+    name = "gesture_recognition_assets",
+    srcs = [
+        ":gesture_recognizer.task",
+    ],
+)
+
+filegroup(
     name = "audio_classification_assets",
     srcs = [
         ":yamnet_audio_classifier_with_metadata.tflite",
@@ -642,6 +683,8 @@ pkg_zip(
         "//mediapipe_api/tasks/cc/vision/face_geometry/calculators:proto_srcs",
         "//mediapipe_api/tasks/cc/vision/hand_detector/proto:proto_srcs",
         "//mediapipe_api/tasks/cc/vision/hand_landmarker/proto:proto_srcs",
+        "//mediapipe_api/tasks/cc/vision/holistic_landmarker/proto:proto_srcs",
+        "//mediapipe_api/tasks/cc/vision/gesture_recognizer/proto:proto_srcs",
         "//mediapipe_api/tasks/cc/vision/image_segmenter/calculators:proto_srcs",
         "//mediapipe_api/tasks/cc/vision/image_segmenter/proto:proto_srcs",
         "//mediapipe_api/tasks/cc/vision/object_detector/proto:proto_srcs",

@@ -3,6 +3,8 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
 using TMPro;
+using PlayFab.ClientModels;
+using PlayFab;
 
 public class ButtonsLogic : MonoBehaviour
 {
@@ -16,9 +18,9 @@ public class ButtonsLogic : MonoBehaviour
         SceneManager.LoadScene("LoadingScene");
     }
 
-    public void Profile()
+    public void Settings()
     {
-        ApplicationVariables.SceneToLoad = "ProfileScene";
+        ApplicationVariables.SceneToLoad = "SettingsScene";
         SceneManager.LoadScene("LoadingScene");
     }
 
@@ -126,21 +128,37 @@ public class ButtonsLogic : MonoBehaviour
     {
         if (clickedButton.tag == "Tutorial")
         {
+            ApplicationVariables.StartWithTutorial = true;
             PopUpTutorialObject.SetActive(false);
-            //por enquanto nao faz nada, mas depois pode ser usado para mostrar o tutorial
             Time.timeScale = 1f;
             SceneManager.LoadScene("LoadingScene");
-            
+
         }
         else if (clickedButton.tag == "Play")
         {
+            ApplicationVariables.StartWithTutorial = false;
             PopUpTutorialObject.SetActive(false);
             Time.timeScale = 1f;
             SceneManager.LoadScene("LoadingScene");
-        } 
+        }
         else
         {
             Debug.Log("Clicked button non identified.");
+        }
+    }
+
+    public void Logout()
+    {
+        PlayFabClientAPI.ForgetAllCredentials();
+        ApplicationVariables.SceneToLoad = "AuthenticationScene";
+        SceneManager.LoadScene("LoadingScene");
+    }
+
+    public void RestartLevel()
+    {
+        if (ApplicationVariables.SceneToLoad == "GymScene")
+        { 
+            SceneManager.LoadScene("LoadingScene");
         }
     }
 }

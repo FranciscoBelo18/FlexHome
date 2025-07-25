@@ -5,6 +5,7 @@ using PlayFab.DataModels;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class ExercisesManager : MonoBehaviour
 {

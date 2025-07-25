@@ -28,7 +28,7 @@ namespace Mediapipe.Unity
     {
       None = 0,
       Face = 1,
-      // Torso = 2,
+      Torso = 2,
       LeftArm = 4,
       LeftHand = 8,
       RightArm = 16,
@@ -45,51 +45,16 @@ namespace Mediapipe.Unity
       4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32
     };
     private static readonly List<(int, int)> _Connections = new List<(int, int)> {
-      // Left Eye
-      (0, 1),
-      (1, 2),
-      (2, 3),
-      (3, 7),
-      // Right Eye
-      (0, 4),
-      (4, 5),
-      (5, 6),
-      (6, 8),
-      // Lips
-      (9, 10),
-      // Left Arm
-      (11, 13),
-      (13, 15),
-      // Left Hand
-      (15, 17),
-      (15, 19),
-      (15, 21),
-      (17, 19),
-      // Right Arm
-      (12, 14),
-      (14, 16),
-      // Right Hand
-      (16, 18),
-      (16, 20),
-      (16, 22),
-      (18, 20),
-      // Torso
-      (11, 12),
-      (12, 24),
-      (24, 23),
-      (23, 11),
-      // Left Leg
-      (23, 25),
-      (25, 27),
-      (27, 29),
-      (27, 31),
-      (29, 31),
-      // Right Leg
-      (24, 26),
-      (26, 28),
-      (28, 30),
-      (28, 32),
-      (30, 32),
+      (0, 1), (1, 2), (2, 3), (3, 7), // Left Eye
+      (0, 4), (4, 5), (5, 6), (6, 8), // Right Eye
+      (9, 10),                       // Lips
+      (11, 13), (13, 15),           // Left Arm
+      (15, 17), (15, 19), (15, 21), (17, 19), // Left Hand
+      (12, 14), (14, 16),           // Right Arm
+      (16, 18), (16, 20), (16, 22), (18, 20), // Right Hand
+      (11, 12), (12, 24), (24, 23), (23, 11), // Torso
+      (23, 25), (25, 27), (27, 29), (27, 31), (29, 31), // Left Leg
+      (24, 26), (26, 28), (28, 30), (28, 32), (30, 32), // Right Leg
     };
 
     public override bool isMirrored
@@ -119,7 +84,6 @@ namespace Mediapipe.Unity
       _landmarkListAnnotation.Fill(_LandmarkCount);
       ApplyLeftLandmarkColor(_leftLandmarkColor);
       ApplyRightLandmarkColor(_rightLandmarkColor);
-
       _connectionListAnnotation.Fill(_Connections, _landmarkListAnnotation);
     }
 
@@ -166,7 +130,6 @@ namespace Mediapipe.Unity
       if (ActivateFor(target))
       {
         _landmarkListAnnotation.Draw(target, scale, visualizeZ);
-        // Draw explicitly because connection annotation's targets remain the same.
         _connectionListAnnotation.Redraw();
       }
     }
@@ -182,7 +145,6 @@ namespace Mediapipe.Unity
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
         ApplyMask(mask);
-        // Draw explicitly because connection annotation's targets remain the same.
         _connectionListAnnotation.Redraw();
       }
     }
@@ -198,7 +160,6 @@ namespace Mediapipe.Unity
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
         ApplyMask(mask);
-        // Draw explicitly because connection annotation's targets remain the same.
         _connectionListAnnotation.Redraw();
       }
     }
@@ -210,95 +171,75 @@ namespace Mediapipe.Unity
 
     public void Draw(IReadOnlyList<NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(NormalizedLandmarkList target, bool visualizeZ = false)
     {
-      Draw(target?.Landmark, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target?.Landmark, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(IReadOnlyList<mptcc.NormalizedLandmark> target, bool visualizeZ = false)
     {
-      Draw(target, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     public void Draw(mptcc.NormalizedLandmarks target, bool visualizeZ = false)
     {
-      Draw(target.landmarks, BodyParts.All & ~BodyParts.Face, visualizeZ);
+      Draw(target.landmarks, BodyParts.All & ~BodyParts.Face & ~BodyParts.LeftHand & ~BodyParts.RightHand, visualizeZ);
     }
 
     private void ApplyLeftLandmarkColor(Color color)
     {
-      var annotationCount = _landmarkListAnnotation == null ? 0 : _landmarkListAnnotation.count;
-      if (annotationCount >= _LandmarkCount)
+      if (_landmarkListAnnotation == null || _landmarkListAnnotation.count < _LandmarkCount) return;
+      foreach (var index in _LeftLandmarks)
       {
-        foreach (var index in _LeftLandmarks)
-        {
-          _landmarkListAnnotation[index].SetColor(color);
-        }
+        _landmarkListAnnotation[index].SetColor(color);
       }
     }
 
     private void ApplyRightLandmarkColor(Color color)
     {
-      var annotationCount = _landmarkListAnnotation == null ? 0 : _landmarkListAnnotation.count;
-      if (annotationCount >= _LandmarkCount)
+      if (_landmarkListAnnotation == null || _landmarkListAnnotation.count < _LandmarkCount) return;
+      foreach (var index in _RightLandmarks)
       {
-        foreach (var index in _RightLandmarks)
-        {
-          _landmarkListAnnotation[index].SetColor(color);
-        }
+        _landmarkListAnnotation[index].SetColor(color);
       }
     }
 
     private void ApplyMask(BodyParts mask)
     {
-      if (mask == BodyParts.All)
+      if (_landmarkListAnnotation == null || _landmarkListAnnotation.count < _LandmarkCount) return;
+
+      for (int i = 0; i < _LandmarkCount; i++)
       {
-        return;
-      }
-      // Desativar os pontos da face (0 a 10) se a máscara não incluir "Face"
-      if (!mask.HasFlag(BodyParts.Face))
-      {
-          for (var i = 0; i <= 10; i++) // Índices de 0 a 10 correspondem à face
-          {
-              _landmarkListAnnotation[i].SetActive(false);
-          }
-      }
-      if (!mask.HasFlag(BodyParts.LeftArm))
-      {
-        // deactivate left elbow to hide left arm
-        _landmarkListAnnotation[13].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.LeftHand))
-      {
-        // deactive left wrist, thumb, index and pinky to hide left hand
-        _landmarkListAnnotation[15].SetActive(false);
-        _landmarkListAnnotation[17].SetActive(false);
-        _landmarkListAnnotation[19].SetActive(false);
-        _landmarkListAnnotation[21].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.RightArm))
-      {
-        // deactivate right elbow to hide right arm
-        _landmarkListAnnotation[14].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.RightHand))
-      {
-        // deactivate right wrist, thumb, index and pinky to hide right hand
-        _landmarkListAnnotation[16].SetActive(false);
-        _landmarkListAnnotation[18].SetActive(false);
-        _landmarkListAnnotation[20].SetActive(false);
-        _landmarkListAnnotation[22].SetActive(false);
-      }
-      if (!mask.HasFlag(BodyParts.LowerBody))
-      {
-        // deactivate lower body landmarks
-        for (var i = 25; i <= 32; i++)
+        bool isActive = true;
+
+        // Desativar rosto
+        if (!mask.HasFlag(BodyParts.Face) && i <= 10)
         {
-          _landmarkListAnnotation[i].SetActive(false);
+          isActive = false;
         }
+
+        // Desativar mão esquerda
+        if (!mask.HasFlag(BodyParts.LeftHand) && (i == 15 || i == 17 || i == 19 || i == 21))
+        {
+          isActive = false;
+        }
+
+        // Desativar mão direita
+        if (!mask.HasFlag(BodyParts.RightHand) && (i == 16 || i == 18 || i == 20 || i == 22))
+        {
+          isActive = false;
+        }
+
+        // Desativar pés
+        if (i==11 || i==12 ||i==13 || i== 14 || i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
+        {
+          isActive = false;
+        }
+
+        _landmarkListAnnotation[i].SetActive(isActive);
       }
     }
   }

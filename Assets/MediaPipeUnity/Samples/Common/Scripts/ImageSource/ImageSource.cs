@@ -63,7 +63,7 @@ namespace Mediapipe.Unity
     /// </remarks>
     public virtual double frameRate => resolution.frameRate;
     public float focalLengthPx { get; } = 2.0f; // TODO: calculate at runtime
-    public virtual bool isHorizontallyFlipped { get; set; } = false;
+    public virtual bool isHorizontallyFlipped { get; set; } = true;
     public virtual bool isVerticallyFlipped { get; } = false;
     public virtual bool isFrontFacing { get; } = false;
     public virtual RotationAngle rotation { get; } = RotationAngle.Rotation0;
@@ -154,6 +154,13 @@ namespace Mediapipe.Unity
     protected static TextureFormat TextureFormatFor(Texture texture)
     {
       return GraphicsFormatUtility.GetTextureFormat(texture.graphicsFormat);
+    }
+
+    public Experimental.ImageTransformationOptions GetTransformationOptions(bool expectedToBeMirrored = false)
+    {
+      var shouldFlipHorizontally = (isFrontFacing || expectedToBeMirrored) ^ isHorizontallyFlipped;
+      var shouldFlipVertically = isVerticallyFlipped;
+      return Experimental.ImageTransformationOptions.Build(shouldFlipHorizontally, shouldFlipVertically, rotation);
     }
   }
 }

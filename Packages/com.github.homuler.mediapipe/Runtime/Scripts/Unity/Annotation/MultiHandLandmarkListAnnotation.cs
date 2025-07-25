@@ -166,6 +166,4 @@ namespace Mediapipe.Unity
       }
     }
   }
-
-
 }
