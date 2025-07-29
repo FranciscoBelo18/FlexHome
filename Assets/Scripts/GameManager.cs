@@ -49,14 +49,18 @@ public class GameManager : MonoBehaviour
     public GameObject PopUpWarningOutOfBounds;
     public AudioSource backgroundAudio;
     public Camera uiCamera;
+    private bool isInitialized = false;
 
     void Start()
     {
-        if (ApplicationVariables.StartWithTutorial)
+        if (!ApplicationVariables.StartWithTutorial)
         {
-            return;
+            InitializeGame();
         }
+    }
 
+    private void InitializeGame()
+    {
         RepCompletedAudio = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
         Debug.Log("Type of exercises: " + ApplicationVariables.TypeOfExercises);
@@ -67,114 +71,119 @@ public class GameManager : MonoBehaviour
         ApplicationVariables.isAllExercisesCompleted = false;
         GetExercises();
         jointAngleCalculation.GetJointsToCalculateAngles();
+        isInitialized = true;
     }
 
     void Update()
     {
-        if (ApplicationVariables.StartWithTutorial)
+        if (!ApplicationVariables.StartWithTutorial)
         {
-            return;
-        }
-        AnalyzeSettings(RepCompletedAudio, backgroundAudio);
-        
-        if (totalPointsText != null)
-        {
-            totalPointsText.text = "Total Points: " + ApplicationVariables.PointsEarned;
-        }
-
-        if (!ApplicationVariables.isAllExercisesCompleted)
-        {
-            if (exerciseText.text != "Active Exercise: " + ApplicationVariables.ActualExercise)
+            if (!isInitialized)
             {
-                UpdateExerciseText();
+                InitializeGame();
             }
 
-            if (previousState != ApplicationVariables.ActualState)
+            AnalyzeSettings(RepCompletedAudio, backgroundAudio);
+
+            if (totalPointsText != null)
             {
-                if (previousState == "Exercise" && ApplicationVariables.ActualState == "ExerciseDemo")
+                totalPointsText.text = "Total Points: " + ApplicationVariables.PointsEarned;
+            }
+
+            if (!ApplicationVariables.isAllExercisesCompleted)
+            {
+                if (exerciseText.text != "Active Exercise: " + ApplicationVariables.ActualExercise)
                 {
-                    StoreExerciseResults();
-                    UpdateActiveExercise();
                     UpdateExerciseText();
-                    ResetStrikeThroughLines();
+                }
+
+                if (previousState != ApplicationVariables.ActualState)
+                {
+                    if (previousState == "Exercise" && ApplicationVariables.ActualState == "ExerciseDemo")
+                    {
+                        StoreExerciseResults();
+                        UpdateActiveExercise();
+                        UpdateExerciseText();
+                        ResetStrikeThroughLines();
+                        ApplicationVariables.RepsCompleted = 0;
+                        swapCounter = 0;
+                    }
+
+                    var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+
+                    if (currentExerciseData != null && !currentExerciseData.together)
+                    {
+                        activeLegObject.SetActive(true);
+                    }
+
+                    UpdateGamePhaseText();
+                    previousState = ApplicationVariables.ActualState;
+                }
+
+                if (ApplicationVariables.ActualState == "ExerciseDemo")
+                {
+                    UserPoseDisplay.SetActive(false);
+                    DemoVideoDisplay.SetActive(true);
                     ApplicationVariables.RepsCompleted = 0;
-                    swapCounter = 0;
+                    activeLegText.text = "Right Leg";
+                    activeLegObject.SetActive(false);
                 }
-
-                var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
-
-                if (currentExerciseData != null && !currentExerciseData.together)
+                else if (ApplicationVariables.ActualState == "Exercise")
                 {
-                    activeLegObject.SetActive(true);
+                    UserPoseDisplay.SetActive(true);
+                    DemoVideoDisplay.SetActive(false);
+                    StartCoroutine(CacheLandmarkPointsWhenReady());
+                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    {
+                        Debug.Log("Some essential points are out of bounds of the RawImage.");
+                        PopUpWarningOutOfBounds.SetActive(true);
+                        timer.PauseTimer();
+                    }
+                    else
+                    {
+                        PopUpWarningOutOfBounds.SetActive(false);
+                        timer.ResumeTimer();
+                    }
+
+                    if (!timer.IsTimerPaused())
+                    {
+                        AnalyzePose();
+                    }
                 }
-
-                UpdateGamePhaseText();
-                previousState = ApplicationVariables.ActualState;
-            }
-
-            if (ApplicationVariables.ActualState == "ExerciseDemo")
-            {
-                UserPoseDisplay.SetActive(false);
-                DemoVideoDisplay.SetActive(true);
-                ApplicationVariables.RepsCompleted = 0;
-                activeLegText.text = "Right Leg";
-                activeLegObject.SetActive(false);
-            }
-            else if (ApplicationVariables.ActualState == "Exercise")
-            {
-                UserPoseDisplay.SetActive(true);
-                DemoVideoDisplay.SetActive(false);
-                StartCoroutine(CacheLandmarkPointsWhenReady());
-                if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                if (SettingsPopUp.activeSelf)
                 {
-                    Debug.Log("Some essential points are out of bounds of the RawImage.");
-                    PopUpWarningOutOfBounds.SetActive(true);
-                    timer.PauseTimer();
+                    Time.timeScale = 0f;
+                    SettingsButton.SetActive(false);
+                    if (ApplicationVariables.ActualState == "ExerciseDemo")
+                    {
+                        TutorialVideo.Pause();
+                    }
                 }
                 else
                 {
-                    PopUpWarningOutOfBounds.SetActive(false);
-                    timer.ResumeTimer();
+                    Time.timeScale = 1f;
+                    SettingsButton.SetActive(true);
+                    if (ApplicationVariables.ActualState == "ExerciseDemo")
+                    {
+                        TutorialVideo.Play();
+                    }
                 }
 
-                if (!timer.IsTimerPaused())
-                {
-                    AnalyzePose();
-                }
-            }
-            if (SettingsPopUp.activeSelf)
-            {
-                Time.timeScale = 0f;
-                SettingsButton.SetActive(false);
-                if (ApplicationVariables.ActualState == "ExerciseDemo")
-                {
-                    TutorialVideo.Pause();
-                }
+                CheckRepsCompleted();
             }
             else
             {
-                Time.timeScale = 1f;
-                SettingsButton.SetActive(true);
-                if (ApplicationVariables.ActualState == "ExerciseDemo")
+                if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
                 {
-                    TutorialVideo.Play();
+                    TimerObject.SetActive(false);
+                    UserPoseDisplay.SetActive(false);
+                    DemoVideoDisplay.SetActive(false);
+                    gamePhaseTextObj.SetActive(false);
+                    exTextObj.SetActive(false);
+                    SettingsButton.SetActive(false);
+                    PopUpExercisesCompleted.SetActive(true);
+                    DisplayResultsOnPopup();
                 }
-            }
-
-            CheckRepsCompleted();
-        }
-        else
-        {
-            if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
-            {
-                TimerObject.SetActive(false);
-                UserPoseDisplay.SetActive(false);
-                DemoVideoDisplay.SetActive(false);
-                gamePhaseTextObj.SetActive(false);
-                exTextObj.SetActive(false);
-                SettingsButton.SetActive(false);
-                PopUpExercisesCompleted.SetActive(true);
-                DisplayResultsOnPopup();
             }
         }
     }
