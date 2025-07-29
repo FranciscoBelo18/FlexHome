@@ -26,23 +26,28 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        if (isPaused)
+        if (!ApplicationVariables.StartWithTutorial)
         {
-            Debug.LogWarning("Timer está pausado no update");
-            return;
-        }
 
-        time -= Time.deltaTime;
-        time = Mathf.Max(0, time);
 
-        timerText.text = ((int)time).ToString();
-        timerCircle.fillAmount = time / initialTime;
+            if (isPaused)
+            {
+                Debug.LogWarning("Timer está pausado no update");
+                return;
+            }
 
-        if (time <= 0)
-        {
-            gameObject.SetActive(false);
-            SwitchStateAndRestart();
-            gameObject.SetActive(true);
+            time -= Time.deltaTime;
+            time = Mathf.Max(0, time);
+
+            timerText.text = ((int)time).ToString();
+            timerCircle.fillAmount = time / initialTime;
+
+            if (time <= 0)
+            {
+                gameObject.SetActive(false);
+                SwitchStateAndRestart();
+                gameObject.SetActive(true);
+            }
         }
     }
 
