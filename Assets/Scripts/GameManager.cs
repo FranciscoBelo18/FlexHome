@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     public AudioSource backgroundAudio;
     public Camera uiCamera;
     private bool isInitialized = false;
+    private Dictionary<int, int> JointAnglePredictPair = new Dictionary<int, int>();
+
 
     void Start()
     {
@@ -72,6 +74,10 @@ public class GameManager : MonoBehaviour
         GetExercises();
         jointAngleCalculation.GetJointsToCalculateAngles();
         isInitialized = true;
+        if (ApplicationVariables.GameVersion == "Dynamic")
+        {
+            GetJointsPairForPrediction();
+        }
     }
 
     void Update()
@@ -229,6 +235,26 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    private void GetJointsPairForPrediction()
+    {
+        PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
+        {
+            if (result.Data != null && result.Data.ContainsKey("JointPairCorrection"))
+            {
+                string jointPairsJson = result.Data["JointPairCorrection"];
+                JointAnglePredictPair = JsonConvert.DeserializeObject<Dictionary<int, int>>(jointPairsJson);
+            }
+            else
+            {
+                Debug.LogWarning("No JointPairCorrection key found in title data.");
+            }
+        },
+        error =>
+        {
+            Debug.LogError("Error getting title data: " + error.GenerateErrorReport());
+        });
+    }
+
     public void UpdateActiveExercise()
     {
         var currentExerciseIndex = System.Array.IndexOf(ApplicationVariables.Exercises, ApplicationVariables.ActualExercise);
@@ -284,33 +310,68 @@ public class GameManager : MonoBehaviour
 
     public void AnalyzePose()
     {
-        foreach (var ExJoint in activeExerciseJoints)
+        if (ApplicationVariables.GameVersion == "Standard")
         {
-            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+            foreach (var ExJoint in activeExerciseJoints)
             {
-                if (joints.Key == ExJoint)
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
                 {
-                    float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
-                    float angleTarget = JointAnglePair[ExJoint];
-                    float angleDiff = Mathf.Abs(angle - angleTarget);
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
 
-                    if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                    {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                        }
+                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                        }
+                        else
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                        }
                     }
-                    else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                }
+            }
+            CheckAllJointsColor();
+        }
+        else if (ApplicationVariables.GameVersion == "Dynamic")
+        {
+            foreach (var ExJoint in activeExerciseJoints)
+            {
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                {
+                    if (joints.Key == ExJoint)
                     {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                    }
-                    else
-                    {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
+                        
+                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                        }
+                        else
+                        {
+                            if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            }
+                            else
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                            }
+                                //PredictJointPosition(joints.Value, angleTarget, angleDiff, ExJoint);
+
+                        }
                     }
                 }
             }
         }
-
-        CheckAllJointsColor();
     }
 
     private void CheckAllJointsColor()
@@ -378,19 +439,18 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
     {
-        // Aguarda enquanto o jogador ainda está na pose (todos os pontos estão verdes)
+        //para evitar que fique ali em loop no caso de o player ficar sempre na pose correta e nao ficar no loop de adiçao de pontos
         while (activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green))
         {
             yield return null;
         }
 
-        // Aguarda até que o jogador tenha retornado à base (nenhum ponto mais verde)
+        //espera que fiquem diferentes de verde para entao adicionar pontos e etc
         while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
         {
             yield return null;
         }
 
-        // Agora sim: pose concluída e retorno à base detectado
         pointsSystem.AddPointsRepCompleted();
         ApplicationVariables.RepsCompleted++;
 
@@ -481,7 +541,6 @@ public class GameManager : MonoBehaviour
     private void FinishExercise()
     {
         float timeLeft = timer.GetTime();
-        //converte para inteiro
         int timeInt = Mathf.FloorToInt(timeLeft);
         pointsSystem.AddPointsFromGoal(timeInt * 2);
         timer.ForceEndTimer();
