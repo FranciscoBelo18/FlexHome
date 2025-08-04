@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
     public AudioSource backgroundAudio;
     public Camera uiCamera;
     private bool isInitialized = false;
-    private Dictionary<int, int> JointAnglePredictPair = new Dictionary<int, int>();
+    public JointPrediction jointPrediction;
 
 
     void Start()
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
         isInitialized = true;
         if (ApplicationVariables.GameVersion == "Dynamic")
         {
-            GetJointsPairForPrediction();
+            jointPrediction.GetJointPairsToCorrectFromPlayfab();
         }
     }
 
@@ -235,26 +235,6 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    private void GetJointsPairForPrediction()
-    {
-        PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
-        {
-            if (result.Data != null && result.Data.ContainsKey("JointPairCorrection"))
-            {
-                string jointPairsJson = result.Data["JointPairCorrection"];
-                JointAnglePredictPair = JsonConvert.DeserializeObject<Dictionary<int, int>>(jointPairsJson);
-            }
-            else
-            {
-                Debug.LogWarning("No JointPairCorrection key found in title data.");
-            }
-        },
-        error =>
-        {
-            Debug.LogError("Error getting title data: " + error.GenerateErrorReport());
-        });
-    }
-
     public void UpdateActiveExercise()
     {
         var currentExerciseIndex = System.Array.IndexOf(ApplicationVariables.Exercises, ApplicationVariables.ActualExercise);
@@ -350,10 +330,10 @@ public class GameManager : MonoBehaviour
                         float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
                         float angleTarget = JointAnglePair[ExJoint];
                         float angleDiff = Mathf.Abs(angle - angleTarget);
-                        
+
                         if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
                         {
-                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
                         }
                         else
                         {
@@ -365,7 +345,8 @@ public class GameManager : MonoBehaviour
                             {
                                 landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                             }
-                                //PredictJointPosition(joints.Value, angleTarget, angleDiff, ExJoint);
+
+                            jointPrediction.PredictPosition( ExJoint, landmarkPoints, angleTarget);
 
                         }
                     }

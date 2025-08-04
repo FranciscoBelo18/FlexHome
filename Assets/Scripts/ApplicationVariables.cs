@@ -38,4 +38,5 @@ public static class ApplicationVariables
     }
     public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>();
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
+    public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
 }
