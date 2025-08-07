@@ -57,7 +57,7 @@ public class TutorialManager : MonoBehaviour
 
     public void FinishTutorial()
     {
-        ApplicationVariables.StartWithTutorial = false;
         tutorialPanel.SetActive(false);
+        ApplicationVariables.StartWithTutorial = false;
     }
 }

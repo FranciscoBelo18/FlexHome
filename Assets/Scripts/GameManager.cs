@@ -369,7 +369,7 @@ public class GameManager : MonoBehaviour
 
             if (currentExerciseData != null)
             {
-                if (currentExerciseData.together)
+                /*if (currentExerciseData.together)
                 {
                     StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
                 }
@@ -378,7 +378,8 @@ public class GameManager : MonoBehaviour
                     SwapLegs();
                     ChangeActiveLegText();
                     isWaitingForBaseReturn = false;
-                }
+                }*/
+                StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
             }
         }
     }
@@ -432,9 +433,17 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        pointsSystem.AddPointsRepCompleted();
-        ApplicationVariables.RepsCompleted++;
-
+        if (currentExerciseData.together)
+        {
+            pointsSystem.AddPointsRepCompleted();
+            ApplicationVariables.RepsCompleted++;
+        }
+        else
+        {
+            SwapLegs();
+            ChangeActiveLegText();
+        }
+        
         isWaitingForBaseReturn = false;
     }
 
@@ -597,9 +606,9 @@ public class GameManager : MonoBehaviour
 
         foreach (int index in essentialPoints)
         {
-            if (index >= landmarkPoints.Length || landmarkPoints[index] == null || !landmarkPoints[index].activeInHierarchy)
+            if (index >= landmarkPoints.Length || landmarkPoints[index] == null)
             {
-                Debug.LogWarning("Essential point " + index + " is not available or not active in the scene.");
+                Debug.LogWarning("Essential point " + index + " is not available.");
                 return false;
             }
 

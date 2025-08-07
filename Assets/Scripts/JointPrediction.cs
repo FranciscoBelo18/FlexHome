@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
 using Newtonsoft.Json;
+using System;
 
 public class JointPrediction : MonoBehaviour
 {
+    private GameObject idealMarker;
     public void GetJointPairsToCorrectFromPlayfab()
     {
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
@@ -45,17 +47,27 @@ public class JointPrediction : MonoBehaviour
     }
 
     //como ja tenho a distancia a que o ponto deve estar da joint principal, agora é preciso pegar na mainjoint, aplicar o target angle e a distancia para prever a posicao do ponto ideal
-    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int MainJoint, float angleTarget, float distance)
+    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance)
     {
-        Vector3 mainJointPosition = landmarkPoints[MainJoint].transform.position;
+        //a formula da logica de calculo está no bloco de notas com os passos a seguir
 
-        // Calculate the desired position based on the angle and distance
-        Vector3 desiredPosition = mainJointPosition + Quaternion.Euler(0, angleTarget, 0) * Vector3.forward * distance;
+        Vector3 mainJointPosition = landmarkPoints[mainJoint].transform.position;
 
-        //falta agora é criar um objeto (bola talvez) para representar a posicao ideal e ter algo a apontar (uma animação ou assim)
-        
-   
+        float angleRad = angleTarget * Mathf.Deg2Rad;
+
+        Vector3 desiredPosition = new Vector3(mainJointPosition.x + Mathf.Cos(angleRad) * distance, mainJointPosition.y + Mathf.Sin(angleRad) * distance, mainJointPosition.z);
+
+
+        if (idealMarker == null)
+        {
+            idealMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            idealMarker.transform.localScale = Vector3.one * 0.02f;
+            idealMarker.GetComponent<Renderer>().material.color = Color.blue;
+        }
+
+        idealMarker.transform.position = desiredPosition;
     }
+
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)
     {
