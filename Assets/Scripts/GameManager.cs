@@ -427,19 +427,25 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        //espera que fiquem diferentes de verde para entao adicionar pontos e etc
-        while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
-        {
-            yield return null;
-        }
-
         if (currentExerciseData.together)
         {
+            //espera que fiquem diferentes de verde para entao adicionar pontos e etc
+            while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
+            {
+                yield return null;
+            }
+
             pointsSystem.AddPointsRepCompleted();
             ApplicationVariables.RepsCompleted++;
         }
         else
         {
+            //espera que fiquem diferentes de verde para entao adicionar pontos e etc
+            while (!activeExerciseJoints.Any(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.red))
+            {
+                yield return null;
+            }
+
             SwapLegs();
             ChangeActiveLegText();
         }
