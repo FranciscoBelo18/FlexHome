@@ -588,7 +588,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator WaitThenGetLeaderboard(string leaderboardName)
     {
-        yield return new WaitForSeconds(1f); // tempo para o PlayFab propagar a atualização
+        yield return new WaitForSeconds(1.5f);
 
         leaderboardManager.GetLeaderboard(leaderboardName, () =>
         {
@@ -609,6 +609,13 @@ public class GameManager : MonoBehaviour
     private bool AreEssentialPointsInsideRawImage(RectTransform rawImageRect, GameObject[] landmarkPoints, Camera uiCamera)
     {
         int[] essentialPoints = { 0, 11, 12, 15, 16, 27, 28 };
+
+        //se nao houver landmarkPoints
+        if (landmarkPoints == null || landmarkPoints.Length == 0)
+        {
+            Debug.LogWarning("No landmark points available.");
+            return false;
+        }
 
         foreach (int index in essentialPoints)
         {
