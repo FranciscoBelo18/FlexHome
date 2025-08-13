@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
                     UserPoseDisplay.SetActive(true);
                     DemoVideoDisplay.SetActive(false);
                     StartCoroutine(CacheLandmarkPointsWhenReady());
-                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    /*if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                     {
                         Debug.Log("Some essential points are out of bounds of the RawImage.");
                         PopUpWarningOutOfBounds.SetActive(true);
@@ -149,7 +149,7 @@ public class GameManager : MonoBehaviour
                     {
                         PopUpWarningOutOfBounds.SetActive(false);
                         timer.ResumeTimer();
-                    }
+                    }*/
 
                     if (!timer.IsTimerPaused())
                     {
