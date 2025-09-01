@@ -10,6 +10,7 @@ public class Timer : MonoBehaviour
     private float initialTime;
     private bool isPaused = false;
     private AudioSource audioSource;
+    public Image PauseIcon;
 
     void Start()
     {
@@ -28,11 +29,8 @@ public class Timer : MonoBehaviour
     {
         if (!ApplicationVariables.StartWithTutorial)
         {
-
-
             if (isPaused)
             {
-                Debug.LogWarning("Timer está pausado no update");
                 return;
             }
 
@@ -82,16 +80,18 @@ public class Timer : MonoBehaviour
             ApplicationVariables.ActualState = "ExerciseDemo";
         }
     }
-    
+
     public void PauseTimer()
     {
-        Debug.LogWarning("Timer pausado");
+        PauseIcon.gameObject.SetActive(true);
+        timerText.gameObject.SetActive(false);
         isPaused = true;
     }
 
     public void ResumeTimer()
     {
-        Debug.LogWarning("Timer retomado");
+        PauseIcon.gameObject.SetActive(false);
+        timerText.gameObject.SetActive(true);
         isPaused = false;
     }
 
@@ -109,5 +109,17 @@ public class Timer : MonoBehaviour
     public bool IsTimerPaused()
     {
         return isPaused;
+    }
+
+    public void TimerPressed()
+    {
+        if (isPaused)
+        {
+            ResumeTimer();
+        }
+        else
+        {
+            PauseTimer();
+        }
     }
 }

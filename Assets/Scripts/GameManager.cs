@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
     public Camera uiCamera;
     private bool isInitialized = false;
     public JointPrediction jointPrediction;
+    public TextMeshPro BoardTitle;
 
 
     void Start()
@@ -188,6 +189,7 @@ public class GameManager : MonoBehaviour
                     exTextObj.SetActive(false);
                     SettingsButton.SetActive(false);
                     PopUpExercisesCompleted.SetActive(true);
+                    //talvez meter depois um som de completo
                     DisplayResultsOnPopup();
                 }
             }
@@ -254,6 +256,7 @@ public class GameManager : MonoBehaviour
         if (exerciseText != null)
         {
             exerciseText.text = "Active Exercise: " + ApplicationVariables.ActualExercise;
+            BoardTitle.text = "! " + ApplicationVariables.ActualExercise + " !";
         }
     }
 
@@ -261,7 +264,15 @@ public class GameManager : MonoBehaviour
     {
         if (gamePhaseText != null)
         {
-            gamePhaseText.text = ApplicationVariables.ActualState == "ExerciseDemo" ? "Exercise Demo" : "Gameplay";
+            if (ApplicationVariables.ActualState == "ExerciseDemo")
+            {
+                gamePhaseText.text = "Exercise Demo";
+                gamePhaseTextObj.SetActive(true);
+            }
+            else
+            {
+                gamePhaseTextObj.SetActive(false);
+            }
         }
     }
 
@@ -592,18 +603,12 @@ public class GameManager : MonoBehaviour
 
         leaderboardManager.GetLeaderboard(leaderboardName, () =>
         {
-            StartCoroutine(DisplayLeaderboardResults());
+           foreach (var entry in ApplicationVariables.LeaderboardResults)
+            {
+                LeaderboardText.text += entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points\n";
+            }
         });
-    }
 
-    private IEnumerator DisplayLeaderboardResults()
-    {
-        yield return null;
-
-        foreach (var entry in ApplicationVariables.LeaderboardResults)
-        {
-            LeaderboardText.text += entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points\n";
-        }
     }
 
     private bool AreEssentialPointsInsideRawImage(RectTransform rawImageRect, GameObject[] landmarkPoints, Camera uiCamera)

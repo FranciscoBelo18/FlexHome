@@ -7,7 +7,9 @@ using System;
 
 public class JointPrediction : MonoBehaviour
 {
-    private GameObject idealMarker;
+    // Dicionário para guardar marcadores de cada joint
+    private Dictionary<int, GameObject> markers = new Dictionary<int, GameObject>();
+
     public void GetJointPairsToCorrectFromPlayfab()
     {
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
@@ -29,52 +31,77 @@ public class JointPrediction : MonoBehaviour
         });
     }
 
-    public void PredictPosition(int JointToAnalyze, GameObject[] landmarkPoints, float angleTarget)
+    public void PredictPosition(int jointToAnalyze, GameObject[] landmarkPoints, float angleTarget)
     {
-        Dictionary<int, int> JointsPair = ApplicationVariables.JointPairCorrection;
-
-        if (JointsPair.ContainsKey(JointToAnalyze))
+        if (landmarkPoints == null || jointToAnalyze >= landmarkPoints.Length || landmarkPoints[jointToAnalyze] == null)
         {
-            int JointToPredict = JointsPair[JointToAnalyze];
-
-            float JointsDistance = CalculateDistance(landmarkPoints, JointToAnalyze, JointToPredict);
-
-            //pegar no angulo ideal e prever a pos da joint com base no angulo ideal e da distancia 
-            
-            CalculateDesiredPosition(landmarkPoints, JointToAnalyze, angleTarget, JointsDistance);
+            Debug.LogWarning($"Joint {jointToAnalyze} não é válido para predição.");
+            return;
         }
 
+        Dictionary<int, int> jointsPair = ApplicationVariables.JointPairCorrection;
+
+        if (jointsPair != null && jointsPair.ContainsKey(jointToAnalyze))
+        {
+            int jointToPredict = jointsPair[jointToAnalyze];
+
+            if (jointToPredict >= landmarkPoints.Length || landmarkPoints[jointToPredict] == null)
+            {
+                Debug.LogWarning($"Joint {jointToPredict} não encontrado nos landmarkPoints.");
+                return;
+            }
+
+            float jointsDistance = CalculateDistance(landmarkPoints, jointToAnalyze, jointToPredict);
+
+            CalculateDesiredPosition(landmarkPoints, jointToAnalyze, angleTarget, jointsDistance, jointToPredict);
+        }
     }
 
-    //como ja tenho a distancia a que o ponto deve estar da joint principal, agora é preciso pegar na mainjoint, aplicar o target angle e a distancia para prever a posicao do ponto ideal
-    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance)
+    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict)
     {
-        //a formula da logica de calculo está no bloco de notas com os passos a seguir
-
         Vector3 mainJointPosition = landmarkPoints[mainJoint].transform.position;
+        Vector3 currentDir = (landmarkPoints[jointToPredict].transform.position - mainJointPosition).normalized;
 
-        float angleRad = angleTarget * Mathf.Deg2Rad;
+        // Rotaciona o vetor atual pelo ângulo desejado
+        Quaternion rotation = Quaternion.AngleAxis(angleTarget, Vector3.forward);
+        Vector3 desiredDir = rotation * currentDir;
 
-        Vector3 desiredPosition = new Vector3(mainJointPosition.x + Mathf.Cos(angleRad) * distance, mainJointPosition.y + Mathf.Sin(angleRad) * distance, mainJointPosition.z);
+        Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
 
-
-        if (idealMarker == null)
+        // Cria marcador se ainda não existir para este joint
+        if (!markers.ContainsKey(mainJoint))
         {
-            idealMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            idealMarker.transform.localScale = Vector3.one * 0.02f;
-            idealMarker.GetComponent<Renderer>().material.color = Color.blue;
+            GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            marker.transform.localScale = Vector3.one * 0.03f;
+            marker.GetComponent<Renderer>().material.color = new Color(0f, 0.5f, 1f, 0.7f); // Azul translúcido
+
+            LineRenderer line = marker.AddComponent<LineRenderer>();
+            line.startWidth = 0.01f;
+            line.endWidth = 0.005f;
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.startColor = Color.cyan;
+            line.endColor = Color.blue;
+
+            markers[mainJoint] = marker;
         }
 
+        GameObject idealMarker = markers[mainJoint];
         idealMarker.transform.position = desiredPosition;
-    }
 
+        // Atualiza linha de correção
+        LineRenderer lr = idealMarker.GetComponent<LineRenderer>();
+        if (lr != null)
+        {
+            lr.positionCount = 2;
+            lr.SetPosition(0, mainJointPosition);
+            lr.SetPosition(1, desiredPosition);
+        }
+    }
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)
     {
         Vector3 positionA = landmarkPoints[jointA].transform.position;
         Vector3 positionB = landmarkPoints[jointB].transform.position;
-
-        float distance = Vector3.Distance(positionA, positionB);
-        return distance;
+        return Vector3.Distance(positionA, positionB);
     }
 }
