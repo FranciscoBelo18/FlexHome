@@ -11,6 +11,8 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject WarningPopUp;
     public GameObject dropdown;
     public GameObject PopUpTutorialObject;
+    public GameObject loginPanel;
+    public GameObject registerPanel;
 
     public void PlayGame()
     {
@@ -157,8 +159,20 @@ public class ButtonsLogic : MonoBehaviour
     public void RestartLevel()
     {
         if (ApplicationVariables.SceneToLoad == "GymScene")
-        { 
+        {
             SceneManager.LoadScene("LoadingScene");
         }
+    }
+    
+    public void ActivateLoginPanel()
+    {
+        loginPanel.SetActive(true);
+        registerPanel.SetActive(false);
+    }
+
+    public void ActivateRegisterPanel()
+    {
+        loginPanel.SetActive(false);
+        registerPanel.SetActive(true);
     }
 }

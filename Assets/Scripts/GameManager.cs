@@ -36,7 +36,6 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI ExerciseResultsText;
     public TextMeshProUGUI TotalPointsText;
     private bool isWaitingForBaseReturn = false;
-    public GameObject ScreenDisplay;
     public Timer timer;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
@@ -357,12 +356,13 @@ public class GameManager : MonoBehaviour
                                 landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                             }
 
-                            jointPrediction.PredictPosition( ExJoint, landmarkPoints, angleTarget);
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget);
 
                         }
                     }
                 }
             }
+            CheckAllJointsColor();
         }
     }
 
@@ -380,16 +380,6 @@ public class GameManager : MonoBehaviour
 
             if (currentExerciseData != null)
             {
-                /*if (currentExerciseData.together)
-                {
-                    StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
-                }
-                else
-                {
-                    SwapLegs();
-                    ChangeActiveLegText();
-                    isWaitingForBaseReturn = false;
-                }*/
                 StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
             }
         }
@@ -419,14 +409,7 @@ public class GameManager : MonoBehaviour
     {
         if (activeLegText != null)
         {
-            if (activeLegText.text == "Left Leg")
-            {
-                activeLegText.text = "Right Leg";
-            }
-            else if (activeLegText.text == "Right Leg")
-            {
-                activeLegText.text = "Left Leg";
-            }
+            activeLegText.text = activeLegText.text == "Left Leg" ? "Right Leg" : "Left Leg";
         }
     }
 
@@ -516,7 +499,9 @@ public class GameManager : MonoBehaviour
             foreach (GameObject line in StrikeThroughLines)
             {
                 if (line.tag == "HighestGoal" && !line.activeSelf)
+                {
                     line.SetActive(true);
+                }
             }
             pointsSystem.AddPointsExerciseCompleted();
             FinishExercise();
@@ -592,7 +577,7 @@ public class GameManager : MonoBehaviour
 
             LeaderboardText.text = "";
 
-            // Espera 2 segundos antes de buscar
+            // Para esperar 2 segundos antes de buscar
             StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
         }
     }
@@ -605,7 +590,10 @@ public class GameManager : MonoBehaviour
         {
            foreach (var entry in ApplicationVariables.LeaderboardResults)
             {
-                LeaderboardText.text += entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points\n";
+                if (entry.DisplayName == ApplicationVariables.userLoggedName)
+                {
+                    LeaderboardText.text += "<b>" + entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points</b>\n";
+                }
             }
         });
 
@@ -645,8 +633,6 @@ public class GameManager : MonoBehaviour
     {
         return RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPos, uiCamera, out Vector2 localPoint) && rect.rect.Contains(localPoint);
     }
-
-
 
     private void AnalyzeSettings(AudioSource RepCompleted, AudioSource background)
     {

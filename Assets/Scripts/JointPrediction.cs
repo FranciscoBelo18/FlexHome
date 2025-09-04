@@ -60,20 +60,39 @@ public class JointPrediction : MonoBehaviour
     private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict)
     {
         Vector3 mainJointPosition = landmarkPoints[mainJoint].transform.position;
-        Vector3 currentDir = (landmarkPoints[jointToPredict].transform.position - mainJointPosition).normalized;
 
-        // Rotaciona o vetor atual pelo ângulo desejado
+        // 1) Descobrir o joint âncora (o outro braço que define o ângulo no mainJoint)
+        if (!ApplicationVariables.JointGroupsFromPlayfab.TryGetValue(mainJoint, out var neighbors) 
+            || neighbors == null || neighbors.Length < 2)
+        {
+            Debug.LogWarning($"Não há vizinhos suficientes para calcular ângulo no joint {mainJoint}.");
+            return;
+        }
+
+        // Pega o vizinho que NÃO é o jointToPredict
+        int anchorJoint = (neighbors[0] == jointToPredict) ? neighbors[1] : neighbors[0];
+        if (anchorJoint < 0 || anchorJoint >= landmarkPoints.Length || landmarkPoints[anchorJoint] == null)
+        {
+            Debug.LogWarning($"Joint âncora {anchorJoint} inválido.");
+            return;
+        }
+
+        // 2) Vetor base: do mainJoint para o âncora
+        Vector3 anchorDir = (landmarkPoints[anchorJoint].transform.position - mainJointPosition).normalized;
+
+        // 3) Rotaciona este vetor pelo ângulo alvo (em XY)
         Quaternion rotation = Quaternion.AngleAxis(angleTarget, Vector3.forward);
-        Vector3 desiredDir = rotation * currentDir;
+        Vector3 desiredDir = rotation * anchorDir;
 
+        // 4) Calcula a posição ideal mantendo o comprimento do osso
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
 
-        // Cria marcador se ainda não existir para este joint
-        if (!markers.ContainsKey(mainJoint))
+        // 5) Criar marcador só uma vez
+        if (!markers.ContainsKey(jointToPredict))
         {
             GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             marker.transform.localScale = Vector3.one * 0.03f;
-            marker.GetComponent<Renderer>().material.color = new Color(0f, 0.5f, 1f, 0.7f); // Azul translúcido
+            marker.GetComponent<Renderer>().material.color = new Color(0f, 0.5f, 1f, 0.7f);
 
             LineRenderer line = marker.AddComponent<LineRenderer>();
             line.startWidth = 0.01f;
@@ -82,21 +101,24 @@ public class JointPrediction : MonoBehaviour
             line.startColor = Color.cyan;
             line.endColor = Color.blue;
 
-            markers[mainJoint] = marker;
+            markers[jointToPredict] = marker;
         }
 
-        GameObject idealMarker = markers[mainJoint];
+        // 6) Atualizar marcador em tempo real
+        GameObject idealMarker = markers[jointToPredict];
         idealMarker.transform.position = desiredPosition;
 
-        // Atualiza linha de correção
+        // Atualiza linha: posição atual -> posição ideal
         LineRenderer lr = idealMarker.GetComponent<LineRenderer>();
         if (lr != null)
         {
             lr.positionCount = 2;
-            lr.SetPosition(0, mainJointPosition);
+            lr.SetPosition(0, landmarkPoints[jointToPredict].transform.position);
             lr.SetPosition(1, desiredPosition);
         }
     }
+
+
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)
     {
