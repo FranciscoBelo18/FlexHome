@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
     private bool isInitialized = false;
     public JointPrediction jointPrediction;
     public TextMeshPro BoardTitle;
-
+    public JointPointerManager jointPointerManager;
 
     void Start()
     {
@@ -356,7 +356,7 @@ public class GameManager : MonoBehaviour
                                 landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                             }
 
-                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget);
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
 
                         }
                     }

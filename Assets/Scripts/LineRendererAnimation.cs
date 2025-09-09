@@ -1,60 +1,90 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class IconFlowBetweenObjects : MonoBehaviour
+public class LineRendererAnimation : MonoBehaviour
 {
-    public Transform pointA;
-    public Transform pointB;
     public Sprite connectionSprite;
-    private float iconScale = 0.01f;
-    private float speed = 0.5f;
-    private float spawnRate = 0.5f;
+    public float iconScale = 0.01f;
+    public float speed = 0.5f;
+    public float spawnRate = 0.5f;
 
     private float timer = 0f;
-    private List<GameObject> activeIcons = new List<GameObject>();
+
+    private class LineData
+    {
+        public Transform startPoint;   // joint real
+        public Vector3 endPoint;       // posição prevista
+        public List<GameObject> icons = new List<GameObject>();
+    }
+
+    private List<LineData> activeLines = new List<LineData>();
+
+    // 🔹 Chamado pelo JointPrediction
+    public void CreateLine(Transform start, Vector3 end)
+    {
+        // verifica se já existe uma linha para este joint
+        foreach (var line in activeLines)
+        {
+            if (line.startPoint == start)
+            {
+                line.endPoint = end; // só atualiza o destino
+                return;
+            }
+        }
+
+        var newLine = new LineData { startPoint = start, endPoint = end };
+        activeLines.Add(newLine);
+    }
 
     void Update()
     {
-        if (pointA == null || pointB == null || connectionSprite == null)
+        if (connectionSprite == null || activeLines.Count == 0)
             return;
 
         timer += Time.deltaTime;
         if (timer >= spawnRate)
         {
-            SpawnIcon();
+            foreach (var line in activeLines)
+            {
+                SpawnIcon(line);
+            }
             timer = 0f;
         }
 
-        for (int i = activeIcons.Count - 1; i >= 0; i--)
+        foreach (var line in activeLines)
         {
-            GameObject icon = activeIcons[i];
-            if (icon == null) continue;
-
-            icon.transform.position = Vector3.MoveTowards(
-                icon.transform.position,
-                pointB.position,
-                speed * Time.deltaTime
-            );
-
-            if (Vector3.Distance(icon.transform.position, pointB.position) < 0.01f)
+            for (int i = line.icons.Count - 1; i >= 0; i--)
             {
-                Destroy(icon);
-                activeIcons.RemoveAt(i);
+                GameObject icon = line.icons[i];
+                if (icon == null) continue;
+
+                icon.transform.position = Vector3.MoveTowards(
+                    icon.transform.position,
+                    line.endPoint,
+                    speed * Time.deltaTime
+                );
+
+                if (Vector3.Distance(icon.transform.position, line.endPoint) < 0.01f)
+                {
+                    Destroy(icon);
+                    line.icons.RemoveAt(i);
+                }
             }
         }
     }
 
-    void SpawnIcon()
+    void SpawnIcon(LineData line)
     {
+        if (line.startPoint == null) return;
+
         GameObject iconObj = new GameObject("MovingIcon");
         SpriteRenderer sr = iconObj.AddComponent<SpriteRenderer>();
         sr.sprite = connectionSprite;
         sr.sortingOrder = 1;
 
         iconObj.transform.localScale = Vector3.one * iconScale;
+        iconObj.transform.position = line.startPoint.position;
 
-        iconObj.transform.position = pointA.position;
-
-        activeIcons.Add(iconObj);
+        line.icons.Add(iconObj);
     }
 }
