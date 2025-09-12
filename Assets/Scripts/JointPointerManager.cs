@@ -3,46 +3,68 @@ using System.Collections.Generic;
 
 public class JointPointerManager : MonoBehaviour
 {
-    public GameObject arrowPrefab;
+    public GameObject redArrowPrefab;
+    public GameObject yellowArrowPrefab;
+
     private Dictionary<Transform, GameObject> activeArrows = new Dictionary<Transform, GameObject>();
 
     public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color)
     {
-        if (arrowPrefab == null)
+        if (baseJoint == null || targetPosition == null || color == null){
+            return;
+        }
+
+        GameObject desiredPrefab = null;
+
+        if (color == Color.red)
         {
-            Debug.LogWarning("Arrow prefab não atribuído no inspector!");
+            desiredPrefab = redArrowPrefab;
+        }
+        else if (color == Color.yellow)
+        {
+            desiredPrefab = yellowArrowPrefab;
+        }
+        else
+        {
+            if (activeArrows.ContainsKey(baseJoint))
+            {
+                Destroy(activeArrows[baseJoint]);
+                activeArrows.Remove(baseJoint);
+            }
             return;
         }
 
         GameObject arrow;
+
         if (activeArrows.ContainsKey(baseJoint))
         {
-            // já existe seta, atualizamos
             arrow = activeArrows[baseJoint];
+
+            if (arrow == null || arrow.name.Contains("Red") != desiredPrefab.name.Contains("Red"))
+            {
+                Destroy(arrow);
+                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity, baseJoint);
+                activeArrows[baseJoint] = arrow;
+            }
+            else if (arrow.name.Contains("Yellow") != desiredPrefab.name.Contains("Yellow"))
+            {
+                Destroy(arrow);
+                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity, baseJoint);
+                activeArrows[baseJoint] = arrow;
+            }
         }
         else
         {
-            // instanciamos nova seta
-            arrow = Instantiate(arrowPrefab, baseJoint.position, Quaternion.identity, baseJoint);
+            arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity, baseJoint);
             activeArrows[baseJoint] = arrow;
         }
 
-        // Atualizar posição (junto ao joint base)
         arrow.transform.position = baseJoint.position;
 
-        // Calcular direção para o target
         Vector3 dir = (targetPosition - baseJoint.position).normalized;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
-        // Aplicar rotação
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
-
-        // Atualizar cor
-        var sr = arrow.GetComponent<SpriteRenderer>();
-        if (sr != null)
-        {
-            sr.color = color;
-        }
     }
 
     public void ClearAllPointers()
