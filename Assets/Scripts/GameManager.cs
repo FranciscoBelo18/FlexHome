@@ -345,20 +345,15 @@ public class GameManager : MonoBehaviour
                         {
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
                         }
+                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                        }
                         else
                         {
-                            if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                            {
-                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                            }
-                            else
-                            {
-                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
-                            }
-
-                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
-
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
+                        jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
                     }
                 }
             }

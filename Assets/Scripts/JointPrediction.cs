@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
 using Newtonsoft.Json;
-using System;
 
 public class JointPrediction : MonoBehaviour
 {
@@ -37,11 +36,7 @@ public class JointPrediction : MonoBehaviour
 
     public void PredictPosition(int jointToAnalyze, GameObject[] landmarkPoints, float angleTarget, Color color)
     {
-        if (landmarkPoints == null || jointToAnalyze >= landmarkPoints.Length || landmarkPoints[jointToAnalyze] == null)
-        {
-            Debug.LogWarning($"Joint {jointToAnalyze} não é válido para predição.");
-            return;
-        }
+        if (landmarkPoints == null || jointToAnalyze >= landmarkPoints.Length) return;
 
         Dictionary<int, int> jointsPair = ApplicationVariables.JointPairCorrection;
 
@@ -49,11 +44,7 @@ public class JointPrediction : MonoBehaviour
         {
             int jointToPredict = jointsPair[jointToAnalyze];
 
-            if (jointToPredict >= landmarkPoints.Length || landmarkPoints[jointToPredict] == null)
-            {
-                Debug.LogWarning($"Joint {jointToPredict} não encontrado nos landmarkPoints.");
-                return;
-            }
+            if (jointToPredict >= landmarkPoints.Length) return;
 
             float jointsDistance = CalculateDistance(landmarkPoints, jointToAnalyze, jointToPredict);
 
@@ -63,27 +54,28 @@ public class JointPrediction : MonoBehaviour
 
     private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict, Color color)
     {
+        if (landmarkPoints[mainJoint] == null || landmarkPoints[jointToPredict] == null) return;
+
         Vector3 mainJointPosition = landmarkPoints[mainJoint].transform.position;
 
         if (!ApplicationVariables.JointGroupsFromPlayfab.TryGetValue(mainJoint, out var neighbors) 
-            || neighbors == null || neighbors.Length < 2)
-        {
-            Debug.LogWarning($"Não há vizinhos suficientes para calcular ângulo no joint {mainJoint}.");
-            return;
-        }
+            || neighbors == null || neighbors.Length < 2) return;
 
         int anchorJoint = (neighbors[0] == jointToPredict) ? neighbors[1] : neighbors[0];
-        if (anchorJoint < 0 || anchorJoint >= landmarkPoints.Length || landmarkPoints[anchorJoint] == null)
-        {
-            Debug.LogWarning($"Joint âncora {anchorJoint} inválido.");
-            return;
-        }
 
-        Vector3 anchorDir = (landmarkPoints[anchorJoint].transform.position - mainJointPosition).normalized;
+        if (anchorJoint < 0 || anchorJoint >= landmarkPoints.Length) return;
+
+        // Mesmo que o anchor esteja desativado, usamos sua posição
+        Vector3 anchorPosition = landmarkPoints[anchorJoint] != null
+            ? landmarkPoints[anchorJoint].transform.position
+            : mainJointPosition + Vector3.right; // fallback
+
+        Vector3 anchorDir = (anchorPosition - mainJointPosition).normalized;
         Quaternion rotation = Quaternion.AngleAxis(angleTarget, Vector3.forward);
         Vector3 desiredDir = rotation * anchorDir;
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
 
+        // Passa sempre o Transform mesmo se desativado
         if (jointPointerManager != null)
         {
             jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color);
@@ -92,8 +84,8 @@ public class JointPrediction : MonoBehaviour
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)
     {
-        Vector3 positionA = landmarkPoints[jointA].transform.position;
-        Vector3 positionB = landmarkPoints[jointB].transform.position;
-        return Vector3.Distance(positionA, positionB);
+        Vector3 posA = landmarkPoints[jointA] != null ? landmarkPoints[jointA].transform.position : Vector3.zero;
+        Vector3 posB = landmarkPoints[jointB] != null ? landmarkPoints[jointB].transform.position : Vector3.zero;
+        return Vector3.Distance(posA, posB);
     }
 }
