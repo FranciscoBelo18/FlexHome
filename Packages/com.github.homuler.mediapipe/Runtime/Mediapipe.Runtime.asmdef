@@ -1,7 +1,9 @@
 {
     "name": "Mediapipe.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "AppVariables"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

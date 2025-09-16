@@ -158,7 +158,9 @@ public class ButtonsLogic : MonoBehaviour
 
     public void RestartLevel()
     {
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        ApplicationVariables.SceneToLoad = "GymScene";
+        ApplicationVariables.ActualState = "ExerciseDemo";
+        SceneManager.LoadScene("LoadingScene");
     }
     
     public void ActivateLoginPanel()
