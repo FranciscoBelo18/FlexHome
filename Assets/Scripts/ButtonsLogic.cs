@@ -34,6 +34,7 @@ public class ButtonsLogic : MonoBehaviour
     public void BackToMainMenu()
     {
         ApplicationVariables.SceneToLoad = "MainMenu";
+        ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
     }
 
