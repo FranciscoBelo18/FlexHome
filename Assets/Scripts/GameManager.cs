@@ -353,7 +353,11 @@ public class GameManager : MonoBehaviour
                         {
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
-                        jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
+                        
+                        if (isWaitingForBaseReturn == false)
+                        {
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
+                        }
                     }
                 }
             }

@@ -16,12 +16,12 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 120;
+    public static float TimeLimitToCompleteExercise = 30;
     public static float TimeToDisplayExerciseDemo = 5;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
-    public static int GoodPerformanceRange = 35;
-    public static int AveragePerformanceRange = 70;
-    public static int BadPerformanceRange = 100;
+    public static int GoodPerformanceRange = 15;
+    public static int AveragePerformanceRange = 30;
+    public static int BadPerformanceRange = 50;
     public static int RepsCompleted = 0;
     public static int DesiredReps = 12;
     public static int LowestGoalPoints = 50;
