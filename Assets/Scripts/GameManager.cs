@@ -113,6 +113,7 @@ public class GameManager : MonoBehaviour
                         ResetStrikeThroughLines();
                         ApplicationVariables.RepsCompleted = 0;
                         swapCounter = 0;
+                        jointPointerManager.ClearAllPointers();
                     }
 
                     var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
@@ -331,6 +332,14 @@ public class GameManager : MonoBehaviour
         }
         else if (ApplicationVariables.GameVersion == "Dynamic")
         {
+            jointPrediction.ClearPredictions();
+
+            if (ApplicationVariables.ActualState == "ExerciseDemo")
+            {
+                //evita criar setas durante a demo
+                return;
+            }
+
             foreach (var ExJoint in activeExerciseJoints)
             {
                 foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
@@ -353,7 +362,7 @@ public class GameManager : MonoBehaviour
                         {
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
-                        
+
                         if (isWaitingForBaseReturn == false)
                         {
                             jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);

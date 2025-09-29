@@ -1,85 +1,70 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class JointPointerManager : MonoBehaviour
 {
-    public GameObject redArrowPrefab;
-    public GameObject yellowArrowPrefab;
+    public GameObject redPointerPrefab;
+    public GameObject yellowPointerPrefab;
 
-    // Armazena setas ativas associadas a cada joint
-    private Dictionary<Transform, GameObject> activeArrows = new Dictionary<Transform, GameObject>();
+    private Dictionary<int, GameObject> pointers = new Dictionary<int, GameObject>();
 
-    public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color)
+    public void CreatePointer(Transform currentJoint, Vector3 targetPosition, Color color)
     {
-        if (baseJoint == null) return;
+        if (currentJoint == null) return;
 
-        // Escolhe o prefab correto
-        GameObject desiredPrefab = null;
-        if (color == Color.red) {
-            desiredPrefab = redArrowPrefab;
-        } else if (color == Color.yellow) {
-            desiredPrefab = yellowArrowPrefab;
-        } else 
+        int jointId = currentJoint.gameObject.GetInstanceID();
+
+        if (color == Color.green)
         {
-            // Para cores que não têm prefab, destrói seta existente
-            if (activeArrows.ContainsKey(baseJoint))
-            {
-                Destroy(activeArrows[baseJoint]);
-                activeArrows.Remove(baseJoint);
-            }
+            RemovePointer(jointId);
             return;
         }
 
-        GameObject arrow;
+        GameObject prefabToUse = null;
+        if (color == Color.red) prefabToUse = redPointerPrefab;
+        else if (color == Color.yellow) prefabToUse = yellowPointerPrefab;
 
-        // Verifica se já existe uma seta
-        if (activeArrows.TryGetValue(baseJoint, out arrow))
+        if (prefabToUse == null) return;
+
+        // Se ainda não existe pointer, cria
+        if (!pointers.ContainsKey(jointId) || pointers[jointId] == null)
         {
-            // Se o prefab não corresponder à cor desejada, troca
-            if (arrow == null || !IsSamePrefab(arrow, desiredPrefab))
-            {
-                Destroy(arrow);
-                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity); // não parenta
-                activeArrows[baseJoint] = arrow;
-            }
-        }
-        else
-        {
-            arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity); // não parenta
-            activeArrows[baseJoint] = arrow;
+            GameObject pointer = Instantiate(prefabToUse, transform);
+            pointers[jointId] = pointer;
         }
 
-        // Atualiza posição e rotação da seta
-        arrow.transform.position = baseJoint.position;
-        Vector3 dir = (targetPosition - baseJoint.position).normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
+        // Atualiza sempre
+        UpdatePointer(pointers[jointId], currentJoint.position, targetPosition);
     }
 
-    private bool IsSamePrefab(GameObject arrow, GameObject prefab)
+    private void UpdatePointer(GameObject pointer, Vector3 start, Vector3 end)
     {
-        if (arrow == null || prefab == null) return false;
-        return arrow.name.Replace("(Clone)", "") == prefab.name;
+        if (pointer == null) return;
+
+        Vector3 direction = end - start;
+        float distance = direction.magnitude;
+
+        pointer.transform.position = start;
+        pointer.transform.rotation = Quaternion.LookRotation(Vector3.forward, direction.normalized);
+        pointer.transform.localScale = new Vector3(0.02f, distance, 0.02f);
+    }
+
+    private void RemovePointer(int jointId)
+    {
+        if (pointers.ContainsKey(jointId) && pointers[jointId] != null)
+        {
+            Destroy(pointers[jointId]);
+            pointers.Remove(jointId);
+        }
     }
 
     public void ClearAllPointers()
     {
-        foreach (var arrow in activeArrows.Values)
+        foreach (var kvp in pointers)
         {
-            if (arrow != null) Destroy(arrow);
+            if (kvp.Value != null)
+                Destroy(kvp.Value);
         }
-        activeArrows.Clear();
-    }
-
-    // Atualiza todas as setas em cada frame (opcional, se quiseres seguir joints móveis)
-    public void UpdateAllPointers(Dictionary<Transform, Vector3> targetPositions)
-    {
-        foreach (var kvp in targetPositions)
-        {
-            if (kvp.Key != null)
-            {
-                CreatePointer(kvp.Key, kvp.Value, Color.red); // ou escolhe cor dinamicamente
-            }
-        }
+        pointers.Clear();
     }
 }
