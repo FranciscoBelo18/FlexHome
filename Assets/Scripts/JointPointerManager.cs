@@ -21,19 +21,20 @@ public class JointPointerManager : MonoBehaviour
         }
 
         GameObject prefabToUse = null;
-        if (color == Color.red) prefabToUse = redPointerPrefab;
-        else if (color == Color.yellow) prefabToUse = yellowPointerPrefab;
+        if (color == Color.red) {
+            prefabToUse = redPointerPrefab;
+        } else if (color == Color.yellow) {
+            prefabToUse = yellowPointerPrefab;
+        }
 
         if (prefabToUse == null) return;
 
-        // Se ainda não existe pointer, cria
         if (!pointers.ContainsKey(jointId) || pointers[jointId] == null)
         {
-            GameObject pointer = Instantiate(prefabToUse, transform);
+            GameObject pointer = GameObject.Instantiate(prefabToUse, transform);
             pointers[jointId] = pointer;
         }
 
-        // Atualiza sempre
         UpdatePointer(pointers[jointId], currentJoint.position, targetPosition);
     }
 
@@ -53,7 +54,7 @@ public class JointPointerManager : MonoBehaviour
     {
         if (pointers.ContainsKey(jointId) && pointers[jointId] != null)
         {
-            Destroy(pointers[jointId]);
+            GameObject.Destroy(pointers[jointId]);
             pointers.Remove(jointId);
         }
     }
@@ -63,7 +64,9 @@ public class JointPointerManager : MonoBehaviour
         foreach (var kvp in pointers)
         {
             if (kvp.Value != null)
-                Destroy(kvp.Value);
+            {
+                GameObject.Destroy(kvp.Value);
+            }
         }
         pointers.Clear();
     }

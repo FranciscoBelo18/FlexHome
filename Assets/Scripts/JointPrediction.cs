@@ -7,8 +7,6 @@ using Newtonsoft.Json;
 public class JointPrediction : MonoBehaviour
 {
     private JointPointerManager jointPointerManager;
-
-    // Armazena as posições previstas para hierarquia de correção
     private Dictionary<int, Vector3> predictedPositions = new Dictionary<int, Vector3>();
 
     private void Awake()
@@ -44,13 +42,13 @@ public class JointPrediction : MonoBehaviour
 
     private Vector3 GetJointPosition(GameObject[] landmarkPoints, int jointId)
     {
-        if (predictedPositions.ContainsKey(jointId))
+        if (ApplicationVariables.HipOutOfRange && predictedPositions.ContainsKey(jointId))
             return predictedPositions[jointId];
 
         if (landmarkPoints[jointId] != null)
             return landmarkPoints[jointId].transform.position;
 
-        return Vector3.zero; // fallback
+        return Vector3.zero;
     }
 
     public void PredictPosition(int jointToAnalyze, GameObject[] landmarkPoints, float angleTarget, Color color)
@@ -62,7 +60,6 @@ public class JointPrediction : MonoBehaviour
         if (jointsPair != null && jointsPair.ContainsKey(jointToAnalyze))
         {
             int jointToPredict = jointsPair[jointToAnalyze];
-
             if (jointToPredict >= landmarkPoints.Length) return;
 
             float jointsDistance = CalculateDistance(landmarkPoints, jointToAnalyze, jointToPredict);
@@ -73,8 +70,6 @@ public class JointPrediction : MonoBehaviour
 
     private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict, Color color)
     {
-        if (landmarkPoints[mainJoint] == null || landmarkPoints[jointToPredict] == null) return;
-
         Vector3 mainJointPosition = GetJointPosition(landmarkPoints, mainJoint);
 
         if (!ApplicationVariables.JointGroupsFromPlayfab.TryGetValue(mainJoint, out var neighbors)
@@ -88,7 +83,6 @@ public class JointPrediction : MonoBehaviour
         Vector3 desiredDir = rotation * anchorDir;
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
 
-        // Guarda previsão
         predictedPositions[jointToPredict] = desiredPosition;
 
         if (jointPointerManager != null)

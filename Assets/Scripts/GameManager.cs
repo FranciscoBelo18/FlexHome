@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
     public JointPrediction jointPrediction;
     public TextMeshPro BoardTitle;
     public JointPointerManager jointPointerManager;
+    public VideoManager videoManager;
 
     void Start()
     {
@@ -257,6 +258,7 @@ public class GameManager : MonoBehaviour
         {
             exerciseText.text = "Active Exercise: " + ApplicationVariables.ActualExercise;
             BoardTitle.text = "! " + ApplicationVariables.ActualExercise + " !";
+            videoManager.VideoToPlay(ApplicationVariables.ActualExercise);
         }
     }
 
@@ -300,79 +302,92 @@ public class GameManager : MonoBehaviour
     }
 
     public void AnalyzePose()
+{
+    if (ApplicationVariables.GameVersion == "Standard")
     {
-        if (ApplicationVariables.GameVersion == "Standard")
+        foreach (var ExJoint in activeExerciseJoints)
         {
-            foreach (var ExJoint in activeExerciseJoints)
+            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
             {
-                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                if (joints.Key == ExJoint)
                 {
-                    if (joints.Key == ExJoint)
-                    {
-                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
-                        float angleTarget = JointAnglePair[ExJoint];
-                        float angleDiff = Mathf.Abs(angle - angleTarget);
+                    float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                    float angleTarget = JointAnglePair[ExJoint];
+                    float angleDiff = Mathf.Abs(angle - angleTarget);
 
-                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
-                        }
-                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                        }
-                        else
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
-                        }
-                    }
+                    if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                    else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                    else
+                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                 }
             }
-            CheckAllJointsColor();
         }
-        else if (ApplicationVariables.GameVersion == "Dynamic")
-        {
-            jointPrediction.ClearPredictions();
 
-            if (ApplicationVariables.ActualState == "ExerciseDemo")
-            {
-                //evita criar setas durante a demo
-                return;
-            }
-
-            foreach (var ExJoint in activeExerciseJoints)
-            {
-                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
-                {
-                    if (joints.Key == ExJoint)
-                    {
-                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
-                        float angleTarget = JointAnglePair[ExJoint];
-                        float angleDiff = Mathf.Abs(angle - angleTarget);
-
-                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
-                        }
-                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                        }
-                        else
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
-                        }
-
-                        if (isWaitingForBaseReturn == false)
-                        {
-                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
-                        }
-                    }
-                }
-            }
-            CheckAllJointsColor();
-        }
+        CheckAllJointsColor();
     }
+    else if (ApplicationVariables.GameVersion == "Dynamic")
+    {
+        bool hipOutOfRange = false;
+        int[] hipJoints = { 11, 12 }; //da cintura
+
+        foreach (var hip in hipJoints)
+        {
+            if (JointAnglePair.ContainsKey(hip) && ApplicationVariables.JointGroupsFromPlayfab.ContainsKey(hip))
+            {
+                float angle = jointAngleCalculation.CalculateAngle(ApplicationVariables.JointGroupsFromPlayfab[hip], landmarkPoints);
+                float target = JointAnglePair[hip];
+                float diff = Mathf.Abs(angle - target);
+
+                if (diff > ApplicationVariables.GoodPerformanceRange)
+                {
+                    hipOutOfRange = true;
+                    break;
+                }
+            }
+        }
+
+        ApplicationVariables.HipOutOfRange = hipOutOfRange;
+
+        IEnumerable<int> orderedJoints = activeExerciseJoints;
+
+        if (hipOutOfRange)
+        {
+            orderedJoints = activeExerciseJoints.Reverse();
+        }
+
+        foreach (var ExJoint in orderedJoints)
+            {
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                {
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
+
+                        Color feedbackColor;
+                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                            feedbackColor = Color.green;
+                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                            feedbackColor = Color.yellow;
+                        else
+                            feedbackColor = Color.red;
+
+                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = feedbackColor;
+
+                        if (!isWaitingForBaseReturn)
+                        {
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, feedbackColor);
+                        }
+                    }
+                }
+            }
+        CheckAllJointsColor();
+    }
+}
+
 
     private void CheckAllJointsColor()
     {
