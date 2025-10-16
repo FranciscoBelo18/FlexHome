@@ -34,7 +34,7 @@ public class JointPrediction : MonoBehaviour
         });
     }
 
-    public void PredictPosition(int jointToAnalyze, GameObject[] landmarkPoints, float angleTarget, Color color)
+    public void PredictPosition(int jointToAnalyze, GameObject[] landmarkPoints, float angleTarget, Color color, bool feetOnTheGround)
     {
         if (landmarkPoints == null || jointToAnalyze >= landmarkPoints.Length) return;
 
@@ -48,11 +48,11 @@ public class JointPrediction : MonoBehaviour
 
             float jointsDistance = CalculateDistance(landmarkPoints, jointToAnalyze, jointToPredict);
 
-            CalculateDesiredPosition(landmarkPoints, jointToAnalyze, angleTarget, jointsDistance, jointToPredict, color);
+            CalculateDesiredPosition(landmarkPoints, jointToAnalyze, angleTarget, jointsDistance, jointToPredict, color, feetOnTheGround);
         }
     }
 
-    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict, Color color)
+    private void CalculateDesiredPosition(GameObject[] landmarkPoints, int mainJoint, float angleTarget, float distance, int jointToPredict, Color color, bool feetOnTheGround)
     {
         if (landmarkPoints[mainJoint] == null || landmarkPoints[jointToPredict] == null) return;
 
@@ -78,7 +78,7 @@ public class JointPrediction : MonoBehaviour
         // Passa sempre o Transform mesmo se desativado
         if (jointPointerManager != null)
         {
-            jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color);
+            jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color, feetOnTheGround);
         }
     }
 

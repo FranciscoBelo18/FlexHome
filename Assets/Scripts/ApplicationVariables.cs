@@ -37,7 +37,16 @@ public static class ApplicationVariables
         public int Position;
         public int Score;
     }
+
+    public class ExerciseData
+    {
+        public string name;
+        public bool together;
+        public bool FeetOnTheGround;
+    }
+
     public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>();
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
     public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
+    public static bool IsFirstLoopOfExercise = true;
 }

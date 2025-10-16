@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     private GameObject[] landmarkPoints;
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
-    private List<ExerciseData> selectedExercises = new List<ExerciseData>();
+    private List<ApplicationVariables.ExerciseData> selectedExercises = new List<ApplicationVariables.ExerciseData>();
     public PointsSystem pointsSystem;
     public TextMeshPro totalPointsText;
     private int swapCounter = 0;
@@ -197,12 +197,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public class ExerciseData
-    {
-        public string name;
-        public bool together;
-    }
-
     public void GetExercises()
     {
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
@@ -210,7 +204,7 @@ public class GameManager : MonoBehaviour
             if (result.Data != null && result.Data.ContainsKey("Exercises"))
             {
                 string exercisesJson = result.Data["Exercises"];
-                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ExerciseData>>>(exercisesJson);
+                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ApplicationVariables.ExerciseData>>>(exercisesJson);
                 string selectedType = ApplicationVariables.TypeOfExercises;
 
                 if (allExercises.ContainsKey(selectedType))
@@ -334,6 +328,14 @@ public class GameManager : MonoBehaviour
         }
         else if (ApplicationVariables.GameVersion == "Dynamic")
         {
+            var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+
+            if (currentExerciseData.FeetOnTheGround && ApplicationVariables.IsFirstLoopOfExercise)
+            {
+                var reversedActiveExerciseJoints = activeExerciseJoints.Reverse().ToArray();
+                ApplicationVariables.IsFirstLoopOfExercise = false;
+            }
+
             foreach (var ExJoint in activeExerciseJoints)
             {
                 foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
@@ -356,8 +358,8 @@ public class GameManager : MonoBehaviour
                         {
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
-                        
-                        jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color);
+
+                        jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
                     }
                 }
             }
@@ -371,6 +373,8 @@ public class GameManager : MonoBehaviour
         if (allGreen && !isWaitingForBaseReturn)
         {
             isWaitingForBaseReturn = true;
+
+            jointPointerManager.ClearAllPointers();
 
             StartCoroutine(PlaySoundWithBackground());
 
@@ -411,7 +415,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
+    private IEnumerator CheckBasePositionCoroutine(ApplicationVariables.ExerciseData currentExerciseData)
     {
         //para evitar que fique ali em loop no caso de o player ficar sempre na pose correta e nao ficar no loop de adiçao de pontos
         while (activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green))

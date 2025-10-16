@@ -9,17 +9,21 @@ public class JointPointerManager : MonoBehaviour
     // Armazena setas ativas associadas a cada joint
     private Dictionary<Transform, GameObject> activeArrows = new Dictionary<Transform, GameObject>();
 
-    public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color)
+    public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color, bool feetOnTheGround)
     {
         if (baseJoint == null) return;
 
         // Escolhe o prefab correto
         GameObject desiredPrefab = null;
-        if (color == Color.red) {
+        if (color == Color.red)
+        {
             desiredPrefab = redArrowPrefab;
-        } else if (color == Color.yellow) {
+        }
+        else if (color == Color.yellow)
+        {
             desiredPrefab = yellowArrowPrefab;
-        } else 
+        }
+        else
         {
             // Para cores que não têm prefab, destrói seta existente
             if (activeArrows.ContainsKey(baseJoint))
@@ -49,9 +53,23 @@ public class JointPointerManager : MonoBehaviour
             activeArrows[baseJoint] = arrow;
         }
 
-        // Atualiza posição e rotação da seta
+        // Atualiza posição da seta
         arrow.transform.position = baseJoint.position;
-        Vector3 dir = (targetPosition - baseJoint.position).normalized;
+
+        // Calcula direção
+        Vector3 dir;
+        if (feetOnTheGround)
+        {
+            // Ignora o Y — só olha para a direção no eixo X
+            Vector3 horizontalTarget = new Vector3(targetPosition.x, baseJoint.position.y, targetPosition.z);
+            dir = (horizontalTarget - baseJoint.position).normalized;
+        }
+        else
+        {
+            dir = (targetPosition - baseJoint.position).normalized;
+        }
+
+        // Atualiza rotação
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
@@ -69,17 +87,5 @@ public class JointPointerManager : MonoBehaviour
             if (arrow != null) Destroy(arrow);
         }
         activeArrows.Clear();
-    }
-
-    // Atualiza todas as setas em cada frame (opcional, se quiseres seguir joints móveis)
-    public void UpdateAllPointers(Dictionary<Transform, Vector3> targetPositions)
-    {
-        foreach (var kvp in targetPositions)
-        {
-            if (kvp.Key != null)
-            {
-                CreatePointer(kvp.Key, kvp.Value, Color.red); // ou escolhe cor dinamicamente
-            }
-        }
     }
 }

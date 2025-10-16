@@ -6,13 +6,6 @@ using System;
 
 public class LeaderboardManager : MonoBehaviour
 {
-    public class LeaderboardDataStruct
-    {
-        public string DisplayName;
-        public int Position;
-        public int Score;
-    }
-
     public void SendToLeaderboard(string leaderboardName, int score, Action onSuccess = null)
     {
         var request = new UpdatePlayerStatisticsRequest
