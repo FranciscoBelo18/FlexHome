@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
     public TextMeshPro BoardTitle;
     public JointPointerManager jointPointerManager;
     public VideoManager videoManager;
+    public string leaderboardName;
 
     void Start()
     {
@@ -183,6 +184,19 @@ public class GameManager : MonoBehaviour
             {
                 if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
                 {
+                    if (leaderboardManager != null)
+                    {
+                        if (pointsSystem.GetPointsEarned() > 0)
+                        {
+                            var actualType = ApplicationVariables.TypeOfExercises;
+                            var actualVersion = ApplicationVariables.GameVersion;
+                            leaderboardName = actualType + actualVersion;
+                            
+                            leaderboardManager.SendToLeaderboard(leaderboardName, pointsSystem.GetPointsEarned());
+                        }
+
+                        LeaderboardText.text = "";
+                    }
                     TimerObject.SetActive(false);
                     UserPoseDisplay.SetActive(false);
                     DemoVideoDisplay.SetActive(false);
@@ -330,11 +344,11 @@ public class GameManager : MonoBehaviour
         {
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
-            if (currentExerciseData.FeetOnTheGround && ApplicationVariables.IsFirstLoopOfExercise)
+            /*if (currentExerciseData.FeetOnTheGround && ApplicationVariables.IsFirstLoopOfExercise)
             {
                 var reversedActiveExerciseJoints = activeExerciseJoints.Reverse().ToArray();
                 ApplicationVariables.IsFirstLoopOfExercise = false;
-            }
+            }*/
 
             foreach (var ExJoint in activeExerciseJoints)
             {
@@ -345,6 +359,7 @@ public class GameManager : MonoBehaviour
                         float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
                         float angleTarget = JointAnglePair[ExJoint];
                         float angleDiff = Mathf.Abs(angle - angleTarget);
+                        float angleDifferenceForPrediction = angle - angleTarget;
 
                         if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
                         {
@@ -359,7 +374,14 @@ public class GameManager : MonoBehaviour
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
 
-                        jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
+                        if (currentExerciseData.StaticFeet && (ExJoint == 24 || ExJoint == 23))
+                        {
+                            jointPrediction.PredictHipStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints);
+                        }
+                        else  if (isWaitingForBaseReturn == false)
+                        {
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
+                        }
                     }
                 }
             }
@@ -554,11 +576,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void DisplayResultsOnPopup()
-    {
-        var actualType = ApplicationVariables.TypeOfExercises;
-        var actualVersion = ApplicationVariables.GameVersion;
-        string leaderboardName = actualType + actualVersion;
-        
+    {   
         int index = 1;
         ExerciseResultsText.text = "";
 
@@ -570,18 +588,7 @@ public class GameManager : MonoBehaviour
 
         TotalPointsText.text = pointsSystem.GetPointsEarned().ToString();
 
-        if (leaderboardManager != null)
-        {
-            if (pointsSystem.GetPointsEarned() > 0)
-            {
-                leaderboardManager.SendToLeaderboard(leaderboardName, pointsSystem.GetPointsEarned());
-            }
-
-            LeaderboardText.text = "";
-
-            // Para esperar 2 segundos antes de buscar
-            StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
-        }
+        StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
     }
 
     private IEnumerator WaitThenGetLeaderboard(string leaderboardName)

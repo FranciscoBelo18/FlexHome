@@ -58,7 +58,7 @@ public class JointPrediction : MonoBehaviour
 
         Vector3 mainJointPosition = landmarkPoints[mainJoint].transform.position;
 
-        if (!ApplicationVariables.JointGroupsFromPlayfab.TryGetValue(mainJoint, out var neighbors) 
+        if (!ApplicationVariables.JointGroupsFromPlayfab.TryGetValue(mainJoint, out var neighbors)
             || neighbors == null || neighbors.Length < 2) return;
 
         int anchorJoint = (neighbors[0] == jointToPredict) ? neighbors[1] : neighbors[0];
@@ -79,6 +79,14 @@ public class JointPrediction : MonoBehaviour
         if (jointPointerManager != null)
         {
             jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color, feetOnTheGround);
+        }
+    }
+    
+    public void PredictHipStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints)
+    {
+        if (jointToAnalyze != null)
+        {
+            jointPointerManager.CreateHipPointerForStaticFeet(landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction);
         }
     }
 

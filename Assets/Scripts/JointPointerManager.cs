@@ -74,6 +74,64 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
+    public void CreateHipPointerForStaticFeet(Transform baseJoint, Color color, float angleDifferenceForPrediction)
+    {
+        if (baseJoint == null) return;
+
+        if (color == Color.green)
+        {
+            if (activeArrows.ContainsKey(baseJoint))
+            {
+                Destroy(activeArrows[baseJoint]);
+                activeArrows.Remove(baseJoint);
+            }
+            return;
+        }
+
+        GameObject desiredPrefab = null;
+        if (color == Color.red)
+        {
+            desiredPrefab = redArrowPrefab;
+        }
+        else if (color == Color.yellow)
+        {
+            desiredPrefab = yellowArrowPrefab;
+        }
+        else
+        {
+            // Cores sem prefab → remove seta
+            if (activeArrows.ContainsKey(baseJoint))
+            {
+                Destroy(activeArrows[baseJoint]);
+                activeArrows.Remove(baseJoint);
+            }
+            return;
+        }
+
+        GameObject arrow;
+
+        if (activeArrows.TryGetValue(baseJoint, out arrow))
+        {
+            if (arrow == null || !IsSamePrefab(arrow, desiredPrefab))
+            {
+                Destroy(arrow);
+                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity);
+                activeArrows[baseJoint] = arrow;
+            }
+        }
+        else
+        {
+            arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity);
+            activeArrows[baseJoint] = arrow;
+        }
+
+        arrow.transform.position = baseJoint.position;
+
+        float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
+        arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+    }
+
+
     private bool IsSamePrefab(GameObject arrow, GameObject prefab)
     {
         if (arrow == null || prefab == null) return false;
