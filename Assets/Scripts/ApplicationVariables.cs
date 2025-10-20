@@ -16,7 +16,7 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 60;
+    public static float TimeLimitToCompleteExercise = 3;
     public static float TimeToDisplayExerciseDemo = 2;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
     public static int GoodPerformanceRange = 20;
@@ -31,12 +31,6 @@ public static class ApplicationVariables
     public static int MediumRepsGoal = 10;
     public static int maxResultsToDisplayLeaderboard = 5;
     public static bool HipOutOfRange = false;
-    public class LeaderboardEntry
-    {
-        public string DisplayName;
-        public int Position;
-        public int Score;
-    }
 
     public class ExerciseData
     {
@@ -45,8 +39,6 @@ public static class ApplicationVariables
         public bool FeetOnTheGround;
         public bool StaticFeet;
     }
-
-    public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>();
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
     public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
     public static bool IsFirstLoopOfExercise = true;
