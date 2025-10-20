@@ -184,19 +184,6 @@ public class GameManager : MonoBehaviour
             {
                 if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
                 {
-                    if (leaderboardManager != null)
-                    {
-                        if (pointsSystem.GetPointsEarned() > 0)
-                        {
-                            var actualType = ApplicationVariables.TypeOfExercises;
-                            var actualVersion = ApplicationVariables.GameVersion;
-                            leaderboardName = actualType + actualVersion;
-                            
-                            leaderboardManager.SendToLeaderboard(leaderboardName, pointsSystem.GetPointsEarned());
-                        }
-
-                        LeaderboardText.text = "";
-                    }
                     TimerObject.SetActive(false);
                     UserPoseDisplay.SetActive(false);
                     DemoVideoDisplay.SetActive(false);
@@ -204,7 +191,6 @@ public class GameManager : MonoBehaviour
                     exTextObj.SetActive(false);
                     SettingsButton.SetActive(false);
                     PopUpExercisesCompleted.SetActive(true);
-                    //talvez meter depois um som de completo
                     DisplayResultsOnPopup();
                 }
             }
@@ -576,7 +562,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void DisplayResultsOnPopup()
-    {   
+    {
         int index = 1;
         ExerciseResultsText.text = "";
 
@@ -588,25 +574,48 @@ public class GameManager : MonoBehaviour
 
         TotalPointsText.text = pointsSystem.GetPointsEarned().ToString();
 
-        StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
-    }
-
-    private IEnumerator WaitThenGetLeaderboard(string leaderboardName)
-    {
-        yield return new WaitForSeconds(1.5f);
-
-        leaderboardManager.GetLeaderboard(leaderboardName, () =>
+        if (leaderboardManager != null)
         {
-           foreach (var entry in ApplicationVariables.LeaderboardResults)
+            var actualType = ApplicationVariables.TypeOfExercises;
+            var actualVersion = ApplicationVariables.GameVersion;
+            leaderboardName = actualType + actualVersion;
+
+            int finalPoints = pointsSystem.GetPointsEarned();
+            LeaderboardText.text = "Analysing your score...";
+
+            leaderboardManager.SendToLeaderboard(leaderboardName, finalPoints, () =>
             {
-                if (entry.DisplayName == ApplicationVariables.userLoggedName)
+                StartCoroutine(WaitAndGetLeaderboardAroundPlayer(leaderboardName));
+            });
+        }
+    }
+    
+    private IEnumerator WaitAndGetLeaderboardAroundPlayer(string leaderboardName)
+    {
+        yield return new WaitForSeconds(2.5f); // dá tempo ao PlayFab
+
+        leaderboardManager.GetLeaderboardAroundPlayer(leaderboardName, 5, (leaderboardEntries) =>
+        {
+            LeaderboardText.text = "";
+
+            if (leaderboardEntries != null && leaderboardEntries.Count > 0)
+            {
+                foreach (var entry in leaderboardEntries)
                 {
-                    LeaderboardText.text += "<b>" + entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points</b>\n";
+                    if (entry.DisplayName == ApplicationVariables.userLoggedName)
+                        LeaderboardText.text += $"<b>{entry.Position}º {entry.DisplayName}: {entry.Score} pts </b>\n";
+                    else
+                        LeaderboardText.text += $"{entry.Position}º {entry.DisplayName}: {entry.Score} pts\n";
                 }
             }
+            else
+            {
+                LeaderboardText.text = "Something went wrong.";
+            }
         });
-
     }
+
+
 
     private bool AreEssentialPointsInsideRawImage(RectTransform rawImageRect, GameObject[] landmarkPoints, Camera uiCamera)
     {
