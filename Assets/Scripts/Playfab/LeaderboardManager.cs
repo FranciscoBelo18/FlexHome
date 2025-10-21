@@ -55,8 +55,6 @@ public class LeaderboardManager : MonoBehaviour
         PlayFabClientAPI.GetLeaderboardAroundPlayer(request,
             result =>
             {
-                Debug.Log($"[Leaderboard] Sucesso ao obter leaderboard ao redor do jogador ({leaderboardName})");
-
                 CurrentLeaderboard.Clear();
 
                 foreach (var entry in result.Leaderboard)
@@ -71,7 +69,6 @@ public class LeaderboardManager : MonoBehaviour
                     };
 
                     CurrentLeaderboard.Add(newEntry);
-                    Debug.Log($"[AroundPlayer] {newEntry.Position}º {newEntry.DisplayName}: {newEntry.Score}");
                 }
 
                 onComplete?.Invoke(CurrentLeaderboard);

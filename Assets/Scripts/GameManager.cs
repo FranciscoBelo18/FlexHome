@@ -23,10 +23,12 @@ public class GameManager : MonoBehaviour
     public GameObject gamePhaseTextObj;
     public ReadStretchingFile readStretchingFile;
     private SortedDictionary<int, int> JointAnglePair;
+    private SortedDictionary<int, int> basePositionJointAngles;
     private GameObject landmarkListAnnotation;
     private GameObject[] landmarkPoints;
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
+    private int[] basePositionJoints = new int[0];
     private List<ApplicationVariables.ExerciseData> selectedExercises = new List<ApplicationVariables.ExerciseData>();
     public PointsSystem pointsSystem;
     public TextMeshPro totalPointsText;
@@ -218,6 +220,7 @@ public class GameManager : MonoBehaviour
                     if (teste != null)
                     {
                         GetExerciseJointsAndAnglesFromFile();
+                        GetBasePositionJointsAndAnglesFromFile();
                     }
                 }
             }
@@ -278,6 +281,12 @@ public class GameManager : MonoBehaviour
         activeExerciseJoints = JointAnglePair.Keys.ToArray();
     }
 
+    public void GetBasePositionJointsAndAnglesFromFile()
+    {
+        basePositionJointAngles = readStretchingFile.ReadFile("Normal Standing Posture");
+        basePositionJoints = basePositionJointAngles.Keys.ToArray();
+    }
+
     IEnumerator CacheLandmarkPointsWhenReady()
     {
         while (GameObject.Find("Point List Annotation") == null || GameObject.Find("Point List Annotation").transform.childCount < 33)
@@ -330,12 +339,6 @@ public class GameManager : MonoBehaviour
         {
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
-            /*if (currentExerciseData.FeetOnTheGround && ApplicationVariables.IsFirstLoopOfExercise)
-            {
-                var reversedActiveExerciseJoints = activeExerciseJoints.Reverse().ToArray();
-                ApplicationVariables.IsFirstLoopOfExercise = false;
-            }*/
-
             foreach (var ExJoint in activeExerciseJoints)
             {
                 foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
@@ -360,9 +363,18 @@ public class GameManager : MonoBehaviour
                             landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                         }
 
-                        if (currentExerciseData.StaticFeet && (ExJoint == 24 || ExJoint == 23))
+                        if (currentExerciseData.StaticFeet && ApplicationVariables.ActualExercise == "Squats")
                         {
-                            jointPrediction.PredictHipStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints);
+                            string Direction;
+                            if(ExJoint == 24 || ExJoint == 23)
+                            {
+                                Direction = "Vertical";
+                            }
+                            else
+                            {
+                                Direction = "Horizontal";
+                            }
+                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
                         }
                         else  if (isWaitingForBaseReturn == false)
                         {
@@ -381,6 +393,8 @@ public class GameManager : MonoBehaviour
         if (allGreen && !isWaitingForBaseReturn)
         {
             isWaitingForBaseReturn = true;
+
+            jointPointerManager.createPointers = false;
 
             jointPointerManager.ClearAllPointers();
 
@@ -431,7 +445,7 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        if (currentExerciseData.together)
+        /*if (currentExerciseData.together)
         {
             //espera que fiquem diferentes de verde para entao adicionar pontos e etc
             while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
@@ -452,9 +466,47 @@ public class GameManager : MonoBehaviour
 
             SwapLegs();
             ChangeActiveLegText();
+        }*/
+
+        while (!isInBasePosition())
+        {
+            yield return null;
         }
-        
-        isWaitingForBaseReturn = false;
+
+        if (currentExerciseData.together)
+        {
+            pointsSystem.AddPointsRepCompleted();
+            ApplicationVariables.RepsCompleted++;
+        }
+        else
+        {
+            SwapLegs();
+            ChangeActiveLegText();
+        }
+
+        jointPointerManager.createPointers = true;
+    }
+    
+    private bool isInBasePosition()
+    {
+        foreach (var baseJoint in basePositionJoints)
+        {
+            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+            {
+                if (joints.Key == baseJoint)
+                {
+                    float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                    float angleTarget = basePositionJointAngles[baseJoint];
+                    float angleDiff = Mathf.Abs(angle - angleTarget);
+
+                    if (angleDiff > ApplicationVariables.GoodPerformanceRange)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void SwapLegs()

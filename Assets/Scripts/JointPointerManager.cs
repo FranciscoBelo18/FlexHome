@@ -5,12 +5,15 @@ public class JointPointerManager : MonoBehaviour
 {
     public GameObject redArrowPrefab;
     public GameObject yellowArrowPrefab;
+    public bool createPointers = true;
 
     // Armazena setas ativas associadas a cada joint
     private Dictionary<Transform, GameObject> activeArrows = new Dictionary<Transform, GameObject>();
 
     public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color, bool feetOnTheGround)
     {
+        if (!createPointers) return;
+
         if (baseJoint == null) return;
 
         // Escolhe o prefab correto
@@ -74,8 +77,10 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    public void CreateHipPointerForStaticFeet(Transform baseJoint, Color color, float angleDifferenceForPrediction)
+    public void CreatePointerForStaticFeet(Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction)
     {
+        if (!createPointers) return;
+        
         if (baseJoint == null) return;
 
         if (color == Color.green)
@@ -127,8 +132,17 @@ public class JointPointerManager : MonoBehaviour
 
         arrow.transform.position = baseJoint.position;
 
-        float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
-        arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+        if (Direction == "Vertical")
+        {
+            float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
+            arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+        }
+        else if (Direction == "Horizontal")
+        {
+            float rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+            arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+        }
+        
     }
 
 

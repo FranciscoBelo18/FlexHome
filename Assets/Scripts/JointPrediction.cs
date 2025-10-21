@@ -75,18 +75,17 @@ public class JointPrediction : MonoBehaviour
         Vector3 desiredDir = rotation * anchorDir;
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
 
-        // Passa sempre o Transform mesmo se desativado
         if (jointPointerManager != null)
         {
             jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color, feetOnTheGround);
         }
     }
     
-    public void PredictHipStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints)
+    public void PredictPointerForStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints, string Direction)
     {
         if (jointToAnalyze != null)
         {
-            jointPointerManager.CreateHipPointerForStaticFeet(landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction);
+            jointPointerManager.CreatePointerForStaticFeet(landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction, Direction);
         }
     }
 
