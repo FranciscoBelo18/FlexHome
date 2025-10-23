@@ -1,17 +1,21 @@
 using UnityEngine;
 using PlayFab;
 using PlayFab.ClientModels;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 public class LeaderboardManager : MonoBehaviour
 {
-    public class LeaderboardDataStruct
+    [Serializable]
+    public class LeaderboardEntry
     {
         public string DisplayName;
         public int Position;
         public int Score;
     }
+
+    // Guarda localmente o último leaderboard carregado
+    public List<LeaderboardEntry> CurrentLeaderboard = new List<LeaderboardEntry>();
 
     public void SendToLeaderboard(string leaderboardName, int score, Action onSuccess = null)
     {
@@ -22,7 +26,6 @@ public class LeaderboardManager : MonoBehaviour
                 new StatisticUpdate
                 {
                     StatisticName = leaderboardName,
-                    //Version = ApplicationVariables.GameVersion,
                     Value = score
                 }
             }
@@ -31,55 +34,49 @@ public class LeaderboardManager : MonoBehaviour
         PlayFabClientAPI.UpdatePlayerStatistics(request,
             result =>
             {
-                Debug.Log("Leaderboard updated successfully.");
+                Debug.Log($"[Leaderboard] Score {score} enviado com sucesso para {leaderboardName}");
                 onSuccess?.Invoke();
             },
             error =>
             {
-                Debug.LogError("Failed to update leaderboard: " + error.GenerateErrorReport());
+                Debug.LogError("[Leaderboard] Falha ao enviar: " + error.GenerateErrorReport());
                 onSuccess?.Invoke();
             });
     }
 
-    public void GetLeaderboard(string leaderboardName, Action onComplete = null)
+    public void GetLeaderboardAroundPlayer(string leaderboardName, int maxResults = 5, Action<List<LeaderboardEntry>> onComplete = null)
     {
-        var request = new GetLeaderboardRequest
+        var request = new GetLeaderboardAroundPlayerRequest
         {
             StatisticName = leaderboardName,
-            MaxResultsCount = ApplicationVariables.maxResultsToDisplayLeaderboard
+            MaxResultsCount = maxResults
         };
 
-        PlayFabClientAPI.GetLeaderboard(request,
-            result => OnGetLeaderboardSuccess(result, onComplete),
-            error => OnGetLeaderboardError(error, onComplete)
-        );
-    }
-
-    private void OnGetLeaderboardSuccess(GetLeaderboardResult result, Action onComplete)
-    {
-        Debug.Log("Leaderboard retrieved successfully.");
-
-        ApplicationVariables.LeaderboardResults.Clear();
-
-        foreach (var entry in result.Leaderboard)
-        {
-            var displayName = string.IsNullOrEmpty(entry.DisplayName) ? "Unknown" : entry.DisplayName;
-
-            Debug.Log("Leaderboard Entry: " + displayName + " - Position: " + (entry.Position + 1) + " - Score: " + entry.StatValue);
-
-            ApplicationVariables.LeaderboardResults.Add(new ApplicationVariables.LeaderboardEntry
+        PlayFabClientAPI.GetLeaderboardAroundPlayer(request,
+            result =>
             {
-                DisplayName = displayName,
-                Position = entry.Position + 1, // Começa do 1
-                Score = entry.StatValue
-            });
-        }
+                CurrentLeaderboard.Clear();
 
-        onComplete?.Invoke();
-    }
-    private void OnGetLeaderboardError(PlayFabError error, Action onComplete)
-    {
-        Debug.LogError("Failed to retrieve leaderboard: " + error.GenerateErrorReport());
-        onComplete?.Invoke();
+                foreach (var entry in result.Leaderboard)
+                {
+                    string displayName = string.IsNullOrEmpty(entry.DisplayName) ? "Unknown Player" : entry.DisplayName;
+
+                    var newEntry = new LeaderboardEntry
+                    {
+                        DisplayName = displayName,
+                        Position = entry.Position + 1,
+                        Score = entry.StatValue
+                    };
+
+                    CurrentLeaderboard.Add(newEntry);
+                }
+
+                onComplete?.Invoke(CurrentLeaderboard);
+            },
+            error =>
+            {
+                Debug.LogError("[Leaderboard] Erro ao buscar leaderboard ao redor do jogador: " + error.GenerateErrorReport());
+                onComplete?.Invoke(null);
+            });
     }
 }

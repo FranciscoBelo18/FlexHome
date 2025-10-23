@@ -1,0 +1,22 @@
+{
+    "name": "AppVariables",
+    "rootNamespace": "",
+    "references": [
+        "PlayFab",
+        "PlayFabEditorExtensions",
+        "Unity.TextMeshPro.Tests",
+        "Unity.TextMeshPro.Editor",
+        "UnityEditor.UI",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

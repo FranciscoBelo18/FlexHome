@@ -16,12 +16,12 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 120;
-    public static float TimeToDisplayExerciseDemo = 5;
+    public static float TimeLimitToCompleteExercise = 60;
+    public static float TimeToDisplayExerciseDemo = 20;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
-    public static int GoodPerformanceRange = 35;
-    public static int AveragePerformanceRange = 70;
-    public static int BadPerformanceRange = 100;
+    public static int GoodPerformanceRange = 20;
+    public static int AveragePerformanceRange = 40;
+    public static int BadPerformanceRange = 80;
     public static int RepsCompleted = 0;
     public static int DesiredReps = 12;
     public static int LowestGoalPoints = 50;
@@ -30,12 +30,16 @@ public static class ApplicationVariables
     public static int LowestRepsGoal = 8;
     public static int MediumRepsGoal = 10;
     public static int maxResultsToDisplayLeaderboard = 5;
-    public class LeaderboardEntry
+    public static bool HipOutOfRange = false;
+
+    public class ExerciseData
     {
-        public string DisplayName;
-        public int Position;
-        public int Score;
+        public string name;
+        public bool together;
+        public bool FeetOnTheGround;
+        public bool StaticFeet;
     }
-    public static List<LeaderboardEntry> LeaderboardResults = new List<LeaderboardEntry>();
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
+    public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
+    public static Dictionary<int, Vector3> PredictedPositions = new Dictionary<int, Vector3>();
 }

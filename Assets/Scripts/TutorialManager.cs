@@ -6,6 +6,7 @@ public class TutorialManager : MonoBehaviour
     private Animator tutorialAnimator;
     public GameObject popUpStartTutorial;
     public GameObject popUpTutorialCompleted;
+    public AudioSource backgroundAudio;
 
     void Start()
     {
@@ -22,6 +23,24 @@ public class TutorialManager : MonoBehaviour
             tutorialPanel.SetActive(false);
             popUpStartTutorial.SetActive(false);
             popUpTutorialCompleted.SetActive(false);
+        }
+    }
+
+    void Update()
+    {
+        AnalyzeSetting(backgroundAudio);
+    }
+
+    void AnalyzeSetting(AudioSource audioSource)
+    {
+        foreach (var setting in ApplicationVariables.AudioSettings)
+        {
+            if (setting.Key == "Background Music")
+            {
+                //aqui tem de ser assim invertido porque no playfab meti o bool para verificar se cada setting está ativa ou não
+                //e então aqui inverte-se para se meter esse audio como mute ou não
+                audioSource.mute = !setting.Value;
+            }
         }
     }
 
@@ -57,7 +76,7 @@ public class TutorialManager : MonoBehaviour
 
     public void FinishTutorial()
     {
-        ApplicationVariables.StartWithTutorial = false;
         tutorialPanel.SetActive(false);
+        ApplicationVariables.StartWithTutorial = false;
     }
 }

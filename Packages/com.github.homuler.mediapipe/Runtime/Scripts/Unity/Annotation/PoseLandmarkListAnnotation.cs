@@ -144,7 +144,14 @@ namespace Mediapipe.Unity
       if (ActivateFor(target))
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
-        ApplyMask(mask);
+        if (ApplicationVariables.GameVersion == "Standard")
+        {
+          ApplyMaskStandardVersion(mask);
+        }
+        else
+        {
+          ApplyMaskDynamicVersion(mask);
+        }
         _connectionListAnnotation.Redraw();
       }
     }
@@ -159,7 +166,14 @@ namespace Mediapipe.Unity
       if (ActivateFor(target))
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
-        ApplyMask(mask);
+        if (ApplicationVariables.GameVersion == "Standard")
+        {
+          ApplyMaskStandardVersion(mask);
+        }
+        else
+        {
+          ApplyMaskDynamicVersion(mask);
+        }
         _connectionListAnnotation.Redraw();
       }
     }
@@ -206,8 +220,7 @@ namespace Mediapipe.Unity
         _landmarkListAnnotation[index].SetColor(color);
       }
     }
-
-    private void ApplyMask(BodyParts mask)
+    private void ApplyMaskStandardVersion(BodyParts mask)
     {
       if (_landmarkListAnnotation == null || _landmarkListAnnotation.count < _LandmarkCount) return;
 
@@ -234,13 +247,23 @@ namespace Mediapipe.Unity
         }
 
         // Desativar pés
-        if (i==11 || i==12 ||i==13 || i== 14 || i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
+        if (i == 11 || i == 12 || i == 13 || i == 14 || i == 27 || i == 29 || i == 31 || i == 28 || i == 30 || i == 32)
         {
           isActive = false;
         }
 
         _landmarkListAnnotation[i].SetActive(isActive);
       }
+    }
+
+    private void ApplyMaskDynamicVersion(BodyParts mask)
+    {
+        if (_landmarkListAnnotation == null || _landmarkListAnnotation.count < _LandmarkCount) return;
+
+        for (int i = 0; i < _LandmarkCount; i++)
+        {
+            _landmarkListAnnotation[i].SetActive(false);
+        }
     }
   }
 }

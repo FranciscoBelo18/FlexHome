@@ -23,11 +23,13 @@ public class GameManager : MonoBehaviour
     public GameObject gamePhaseTextObj;
     public ReadStretchingFile readStretchingFile;
     private SortedDictionary<int, int> JointAnglePair;
+    private SortedDictionary<int, int> basePositionJointAngles;
     private GameObject landmarkListAnnotation;
     private GameObject[] landmarkPoints;
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
-    private List<ExerciseData> selectedExercises = new List<ExerciseData>();
+    private int[] basePositionJoints = new int[0];
+    private List<ApplicationVariables.ExerciseData> selectedExercises = new List<ApplicationVariables.ExerciseData>();
     public PointsSystem pointsSystem;
     public TextMeshPro totalPointsText;
     private int swapCounter = 0;
@@ -36,7 +38,6 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI ExerciseResultsText;
     public TextMeshProUGUI TotalPointsText;
     private bool isWaitingForBaseReturn = false;
-    public GameObject ScreenDisplay;
     public Timer timer;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
@@ -50,6 +51,11 @@ public class GameManager : MonoBehaviour
     public AudioSource backgroundAudio;
     public Camera uiCamera;
     private bool isInitialized = false;
+    public JointPrediction jointPrediction;
+    public TextMeshPro BoardTitle;
+    public JointPointerManager jointPointerManager;
+    public VideoManager videoManager;
+    public string leaderboardName;
 
     void Start()
     {
@@ -72,6 +78,10 @@ public class GameManager : MonoBehaviour
         GetExercises();
         jointAngleCalculation.GetJointsToCalculateAngles();
         isInitialized = true;
+        if (ApplicationVariables.GameVersion == "Dynamic")
+        {
+            jointPrediction.GetJointPairsToCorrectFromPlayfab();
+        }
     }
 
     void Update()
@@ -107,6 +117,7 @@ public class GameManager : MonoBehaviour
                         ResetStrikeThroughLines();
                         ApplicationVariables.RepsCompleted = 0;
                         swapCounter = 0;
+                        jointPointerManager.ClearAllPointers();
                     }
 
                     var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
@@ -133,7 +144,7 @@ public class GameManager : MonoBehaviour
                     UserPoseDisplay.SetActive(true);
                     DemoVideoDisplay.SetActive(false);
                     StartCoroutine(CacheLandmarkPointsWhenReady());
-                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    /*if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                     {
                         Debug.Log("Some essential points are out of bounds of the RawImage.");
                         PopUpWarningOutOfBounds.SetActive(true);
@@ -143,7 +154,7 @@ public class GameManager : MonoBehaviour
                     {
                         PopUpWarningOutOfBounds.SetActive(false);
                         timer.ResumeTimer();
-                    }
+                    }*/
 
                     if (!timer.IsTimerPaused())
                     {
@@ -188,12 +199,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public class ExerciseData
-    {
-        public string name;
-        public bool together;
-    }
-
     public void GetExercises()
     {
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
@@ -201,7 +206,7 @@ public class GameManager : MonoBehaviour
             if (result.Data != null && result.Data.ContainsKey("Exercises"))
             {
                 string exercisesJson = result.Data["Exercises"];
-                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ExerciseData>>>(exercisesJson);
+                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ApplicationVariables.ExerciseData>>>(exercisesJson);
                 string selectedType = ApplicationVariables.TypeOfExercises;
 
                 if (allExercises.ContainsKey(selectedType))
@@ -215,6 +220,7 @@ public class GameManager : MonoBehaviour
                     if (teste != null)
                     {
                         GetExerciseJointsAndAnglesFromFile();
+                        GetBasePositionJointsAndAnglesFromFile();
                     }
                 }
             }
@@ -248,6 +254,8 @@ public class GameManager : MonoBehaviour
         if (exerciseText != null)
         {
             exerciseText.text = "Active Exercise: " + ApplicationVariables.ActualExercise;
+            BoardTitle.text = "! " + ApplicationVariables.ActualExercise + " !";
+            videoManager.VideoToPlay(ApplicationVariables.ActualExercise);
         }
     }
 
@@ -255,7 +263,15 @@ public class GameManager : MonoBehaviour
     {
         if (gamePhaseText != null)
         {
-            gamePhaseText.text = ApplicationVariables.ActualState == "ExerciseDemo" ? "Exercise Demo" : "Gameplay";
+            if (ApplicationVariables.ActualState == "ExerciseDemo")
+            {
+                gamePhaseText.text = "Exercise Demo";
+                gamePhaseTextObj.SetActive(true);
+            }
+            else
+            {
+                gamePhaseTextObj.SetActive(false);
+            }
         }
     }
 
@@ -263,6 +279,16 @@ public class GameManager : MonoBehaviour
     {
         JointAnglePair = readStretchingFile.ReadFile(ApplicationVariables.ActualExercise);
         activeExerciseJoints = JointAnglePair.Keys.ToArray();
+    }
+
+    public void GetBasePositionJointsAndAnglesFromFile()
+    {
+        basePositionJointAngles = readStretchingFile.ReadFile("Normal Standing Posture");
+        basePositionJoints = basePositionJointAngles.Keys.ToArray();
+        foreach (var joint in basePositionJoints)
+        {
+            Debug.Log("Base Position Joint: " + joint + " Angle: " + basePositionJointAngles[joint]);
+        }
     }
 
     IEnumerator CacheLandmarkPointsWhenReady()
@@ -284,35 +310,112 @@ public class GameManager : MonoBehaviour
 
     public void AnalyzePose()
     {
-        foreach (var ExJoint in activeExerciseJoints)
+        if (ApplicationVariables.GameVersion == "Standard")
         {
-            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+            foreach (var ExJoint in activeExerciseJoints)
             {
-                if (joints.Key == ExJoint)
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
                 {
-                    float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
-                    float angleTarget = JointAnglePair[ExJoint];
-                    float angleDiff = Mathf.Abs(angle - angleTarget);
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
 
-                    if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
-                    {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
-                    }
-                    else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                    {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                    }
-                    else
-                    {
-                        landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                        }
+                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                        }
+                        else
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                        }
                     }
                 }
             }
+            CheckAllJointsColor();
         }
+        else if (ApplicationVariables.GameVersion == "Dynamic")
+        {
+            var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
-        CheckAllJointsColor();
+            foreach (var ExJoint in activeExerciseJoints)
+            {
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                {
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
+                        float angleDifferenceForPrediction = angle - angleTarget;
+
+                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                        }
+                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                        }
+                        else
+                        {
+                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                        }
+
+                        /*if ((currentExerciseData.StaticFeet && ApplicationVariables.ActualExercise == "Squats") || ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
+                        {
+                            string Direction;
+                            if (ExJoint == 24 || ExJoint == 23)
+                            {
+                                Direction = "Vertical";
+                            }
+                            else
+                            {
+                                Direction = "Horizontal";
+                            }
+                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                        }
+                        else
+                        {
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
+                        }*/
+                        if (currentExerciseData.StaticFeet && ApplicationVariables.ActualExercise == "Squats")
+                        {
+                            string Direction;
+                            if (ExJoint == 24 || ExJoint == 23)
+                            {
+                                Direction = "Vertical";
+                                jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                            }
+                        }  
+                        else if (ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
+                        {
+                            string Direction;
+                            if (ExJoint == 24 || ExJoint == 23)
+                            {
+                                Direction = "Vertical";
+                            }
+                            else
+                            {
+                                Direction = "Horizontal";
+                            }
+                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                        }
+                        else
+                        {
+                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
+                        }
+                    }
+                }
+            }
+            CheckAllJointsColor();
+        }
     }
-
     private void CheckAllJointsColor()
     {
         bool allGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green);
@@ -321,22 +424,17 @@ public class GameManager : MonoBehaviour
         {
             isWaitingForBaseReturn = true;
 
+            jointPointerManager.createPointers = false;
+
+            jointPointerManager.ClearAllPointers();
+
             StartCoroutine(PlaySoundWithBackground());
 
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
             if (currentExerciseData != null)
             {
-                if (currentExerciseData.together)
-                {
-                    StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
-                }
-                else
-                {
-                    SwapLegs();
-                    ChangeActiveLegText();
-                    isWaitingForBaseReturn = false;
-                }
+                StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
             }
         }
     }
@@ -365,36 +463,58 @@ public class GameManager : MonoBehaviour
     {
         if (activeLegText != null)
         {
-            if (activeLegText.text == "Left Leg")
-            {
-                activeLegText.text = "Right Leg";
-            }
-            else if (activeLegText.text == "Right Leg")
-            {
-                activeLegText.text = "Left Leg";
-            }
+            activeLegText.text = activeLegText.text == "Left Leg" ? "Right Leg" : "Left Leg";
         }
     }
 
-    private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
+    private IEnumerator CheckBasePositionCoroutine(ApplicationVariables.ExerciseData currentExerciseData)
     {
-        // Aguarda enquanto o jogador ainda está na pose (todos os pontos estão verdes)
+        //para evitar que fique ali em loop no caso de o player ficar sempre na pose correta e nao ficar no loop de adiçao de pontos
         while (activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green))
         {
             yield return null;
         }
 
-        // Aguarda até que o jogador tenha retornado à base (nenhum ponto mais verde)
-        while (!activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color != Color.green))
+        while (!isInBasePosition())
         {
             yield return null;
         }
 
-        // Agora sim: pose concluída e retorno à base detectado
-        pointsSystem.AddPointsRepCompleted();
-        ApplicationVariables.RepsCompleted++;
+        if (currentExerciseData.together)
+        {
+            pointsSystem.AddPointsRepCompleted();
+            ApplicationVariables.RepsCompleted++;
+        }
+        else
+        {
+            SwapLegs();
+            ChangeActiveLegText();
+        }
 
         isWaitingForBaseReturn = false;
+        jointPointerManager.createPointers = true;
+    }
+    
+    private bool isInBasePosition()
+    {
+        foreach (var baseJoint in basePositionJoints)
+        {
+            foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+            {
+                if (joints.Key == baseJoint)
+                {
+                    float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                    float angleTarget = basePositionJointAngles[baseJoint];
+                    float angleDiff = Mathf.Abs(angle - angleTarget);
+
+                    if (angleDiff > ApplicationVariables.GoodPerformanceRange)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void SwapLegs()
@@ -449,7 +569,9 @@ public class GameManager : MonoBehaviour
             foreach (GameObject line in StrikeThroughLines)
             {
                 if (line.tag == "HighestGoal" && !line.activeSelf)
+                {
                     line.SetActive(true);
+                }
             }
             pointsSystem.AddPointsExerciseCompleted();
             FinishExercise();
@@ -481,7 +603,6 @@ public class GameManager : MonoBehaviour
     private void FinishExercise()
     {
         float timeLeft = timer.GetTime();
-        //converte para inteiro
         int timeInt = Mathf.FloorToInt(timeLeft);
         pointsSystem.AddPointsFromGoal(timeInt * 2);
         timer.ForceEndTimer();
@@ -502,10 +623,6 @@ public class GameManager : MonoBehaviour
 
     private void DisplayResultsOnPopup()
     {
-        var actualType = ApplicationVariables.TypeOfExercises;
-        var actualVersion = ApplicationVariables.GameVersion;
-        string leaderboardName = actualType + actualVersion;
-        
         int index = 1;
         ExerciseResultsText.text = "";
 
@@ -519,47 +636,63 @@ public class GameManager : MonoBehaviour
 
         if (leaderboardManager != null)
         {
-            if (pointsSystem.GetPointsEarned() > 0)
+            var actualType = ApplicationVariables.TypeOfExercises;
+            var actualVersion = ApplicationVariables.GameVersion;
+            leaderboardName = actualType + actualVersion;
+
+            int finalPoints = pointsSystem.GetPointsEarned();
+            LeaderboardText.text = "Analysing your score...";
+
+            leaderboardManager.SendToLeaderboard(leaderboardName, finalPoints, () =>
             {
-                leaderboardManager.SendToLeaderboard(leaderboardName, pointsSystem.GetPointsEarned());
-            }
-
-            LeaderboardText.text = "";
-
-            // Espera 2 segundos antes de buscar
-            StartCoroutine(WaitThenGetLeaderboard(leaderboardName));
+                StartCoroutine(WaitAndGetLeaderboardAroundPlayer(leaderboardName));
+            });
         }
     }
-
-    private IEnumerator WaitThenGetLeaderboard(string leaderboardName)
+    
+    private IEnumerator WaitAndGetLeaderboardAroundPlayer(string leaderboardName)
     {
-        yield return new WaitForSeconds(1f); // tempo para o PlayFab propagar a atualização
+        yield return new WaitForSeconds(2.5f); // dá tempo ao PlayFab
 
-        leaderboardManager.GetLeaderboard(leaderboardName, () =>
+        leaderboardManager.GetLeaderboardAroundPlayer(leaderboardName, 5, (leaderboardEntries) =>
         {
-            StartCoroutine(DisplayLeaderboardResults());
+            LeaderboardText.text = "";
+
+            if (leaderboardEntries != null && leaderboardEntries.Count > 0)
+            {
+                foreach (var entry in leaderboardEntries)
+                {
+                    if (entry.DisplayName == ApplicationVariables.userLoggedName)
+                        LeaderboardText.text += $"<b>{entry.Position}º {entry.DisplayName}: {entry.Score} pts </b>\n";
+                    else
+                        LeaderboardText.text += $"{entry.Position}º {entry.DisplayName}: {entry.Score} pts\n";
+                }
+            }
+            else
+            {
+                LeaderboardText.text = "Something went wrong.";
+            }
         });
     }
 
-    private IEnumerator DisplayLeaderboardResults()
-    {
-        yield return null;
 
-        foreach (var entry in ApplicationVariables.LeaderboardResults)
-        {
-            LeaderboardText.text += entry.Position + "º " + entry.DisplayName + ": " + entry.Score + " points\n";
-        }
-    }
 
     private bool AreEssentialPointsInsideRawImage(RectTransform rawImageRect, GameObject[] landmarkPoints, Camera uiCamera)
     {
         int[] essentialPoints = { 0, 11, 12, 15, 16, 27, 28 };
 
+        //se nao houver landmarkPoints
+        if (landmarkPoints == null || landmarkPoints.Length == 0)
+        {
+            Debug.LogWarning("No landmark points available.");
+            return false;
+        }
+
         foreach (int index in essentialPoints)
         {
-            if (index >= landmarkPoints.Length || landmarkPoints[index] == null || !landmarkPoints[index].activeInHierarchy)
+            if (index >= landmarkPoints.Length || landmarkPoints[index] == null)
             {
-                Debug.LogWarning("Essential point " + index + " is not available or not active in the scene.");
+                Debug.LogWarning("Essential point " + index + " is not available.");
                 return false;
             }
 
@@ -578,8 +711,6 @@ public class GameManager : MonoBehaviour
     {
         return RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPos, uiCamera, out Vector2 localPoint) && rect.rect.Contains(localPoint);
     }
-
-
 
     private void AnalyzeSettings(AudioSource RepCompleted, AudioSource background)
     {
