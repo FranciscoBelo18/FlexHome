@@ -166,14 +166,15 @@ namespace Mediapipe.Unity
       if (ActivateFor(target))
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
-        if (ApplicationVariables.GameVersion == "Standard")
+        if (ApplicationVariables.GameVersion == "Standard" || ApplicationVariables.GameVersion == "Merged")
         {
           ApplyMaskStandardVersion(mask);
         }
-        else
+        else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "None")
         {
           ApplyMaskDynamicVersion(mask);
         }
+        else
         _connectionListAnnotation.Redraw();
       }
     }

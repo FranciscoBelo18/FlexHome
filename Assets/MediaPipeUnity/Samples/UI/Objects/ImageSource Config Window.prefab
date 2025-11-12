@@ -3596,8 +3596,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8340013936643516495}
-        m_TargetAssemblyTypeName: ButtonsLogic, Assembly-CSharp
-        m_MethodName: BackToMainMenu
+        m_TargetAssemblyTypeName: ButtonsLogic, AppVariables
+        m_MethodName: QuitFromSession
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6550,6 +6550,9 @@ MonoBehaviour:
   WarningPopUp: {fileID: 0}
   dropdown: {fileID: 0}
   PopUpTutorialObject: {fileID: 0}
+  loginPanel: {fileID: 0}
+  registerPanel: {fileID: 0}
+  writeLogsToFile: {fileID: 0}
 --- !u!114 &8575688127204079346
 MonoBehaviour:
   m_ObjectHideFlags: 0

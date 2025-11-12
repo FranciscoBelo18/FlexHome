@@ -1039,10 +1039,16 @@ MonoBehaviour:
     - m_Text: ----- Select version -----
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
+    - m_Text: None
+      m_Image: {fileID: 0}
+      m_Color: {r: 1, g: 1, b: 1, a: 1}
     - m_Text: Standard
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
     - m_Text: Dynamic
+      m_Image: {fileID: 0}
+      m_Color: {r: 1, g: 1, b: 1, a: 1}
+    - m_Text: Merged
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_OnValueChanged:
@@ -3369,6 +3375,8 @@ MonoBehaviour:
   WarningPopUp: {fileID: 905880876}
   dropdown: {fileID: 330796260}
   PopUpTutorialObject: {fileID: 1764009388}
+  loginPanel: {fileID: 0}
+  registerPanel: {fileID: 0}
 --- !u!4 &1529295577
 Transform:
   m_ObjectHideFlags: 0

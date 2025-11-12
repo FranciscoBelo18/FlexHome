@@ -16,8 +16,8 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 60;
-    public static float TimeToDisplayExerciseDemo = 20;
+    public static float TimeLimitToCompleteExercise = 30;
+    public static float TimeToDisplayExerciseDemo = 10;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
     public static int GoodPerformanceRange = 20;
     public static int AveragePerformanceRange = 40;
@@ -38,8 +38,11 @@ public static class ApplicationVariables
         public bool together;
         public bool FeetOnTheGround;
         public bool StaticFeet;
+        public bool LateralFrontFacing;
     }
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
     public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
     public static Dictionary<int, Vector3> PredictedPositions = new Dictionary<int, Vector3>();
+    public static bool isLeftLegSide = false;
+    public static bool firstTimeAfterPopUpOutsideBounds = true;
 }

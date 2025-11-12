@@ -13,6 +13,7 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject PopUpTutorialObject;
     public GameObject loginPanel;
     public GameObject registerPanel;
+    private WriteLogsToFile writeLogsToFile;
 
     public void PlayGame()
     {
@@ -33,6 +34,17 @@ public class ButtonsLogic : MonoBehaviour
 
     public void BackToMainMenu()
     {
+        ApplicationVariables.SceneToLoad = "MainMenu";
+        ApplicationVariables.ActualState = "ExerciseDemo";
+        SceneManager.LoadScene("LoadingScene");
+    }
+
+    public void QuitFromSession()
+    {
+        writeLogsToFile = GameObject.Find("LogsManager").GetComponent<WriteLogsToFile>();
+        writeLogsToFile.WriteSessionQuitTimeToFile();
+        writeLogsToFile.WriteSplitLineBetweenExercises();
+        writeLogsToFile.FinishWriting();
         ApplicationVariables.SceneToLoad = "MainMenu";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
@@ -61,7 +73,7 @@ public class ButtonsLogic : MonoBehaviour
             string version = dropdownComponent.options[selectedIndex].text;
             //Debug.Log("Selected game version: " + version);
 
-            if (version == "Standard" || version == "Dynamic")
+            if (version == "None" || version == "Standard" || version == "Dynamic" || version == "Merged")
             {
                 switch (clickedButton.tag)
                 {
@@ -162,6 +174,9 @@ public class ButtonsLogic : MonoBehaviour
         ApplicationVariables.SceneToLoad = "GymScene";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
+        writeLogsToFile.WriteRestartedSessionTimeToFile();
+        writeLogsToFile.WriteSplitLineBetweenExercises();
+        writeLogsToFile.FinishWriting();
     }
     
     public void ActivateLoginPanel()

@@ -11,6 +11,7 @@ public class Timer : MonoBehaviour
     private bool isPaused = false;
     private AudioSource audioSource;
     public Image PauseIcon;
+    public WriteLogsToFile logger;
 
     void Start()
     {
@@ -86,6 +87,7 @@ public class Timer : MonoBehaviour
         PauseIcon.gameObject.SetActive(true);
         timerText.gameObject.SetActive(false);
         isPaused = true;
+        logger.WritePausedTimeToFile();
     }
 
     public void ResumeTimer()
@@ -93,6 +95,7 @@ public class Timer : MonoBehaviour
         PauseIcon.gameObject.SetActive(false);
         timerText.gameObject.SetActive(true);
         isPaused = false;
+        logger.WriteResumedTimeToFile();
     }
 
     public void ForceEndTimer()
