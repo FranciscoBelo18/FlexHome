@@ -144,7 +144,7 @@ namespace Mediapipe.Unity
       if (ActivateFor(target))
       {
         _landmarkListAnnotation.Draw(target, visualizeZ);
-        if (ApplicationVariables.GameVersion == "Standard")
+        if (ApplicationVariables.GameVersion == "Standard" || ApplicationVariables.GameVersion == "Merged")
         {
           ApplyMaskStandardVersion(mask);
         }
