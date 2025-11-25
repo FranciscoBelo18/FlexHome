@@ -171,12 +171,13 @@ public class ButtonsLogic : MonoBehaviour
 
     public void RestartLevel()
     {
-        ApplicationVariables.SceneToLoad = "GymScene";
-        ApplicationVariables.ActualState = "ExerciseDemo";
-        SceneManager.LoadScene("LoadingScene");
+        writeLogsToFile = GameObject.Find("LogsManager").GetComponent<WriteLogsToFile>();
         writeLogsToFile.WriteRestartedSessionTimeToFile();
         writeLogsToFile.WriteSplitLineBetweenExercises();
         writeLogsToFile.FinishWriting();
+        ApplicationVariables.SceneToLoad = "GymScene";
+        ApplicationVariables.ActualState = "ExerciseDemo";
+        SceneManager.LoadScene("LoadingScene");
     }
     
     public void ActivateLoginPanel()

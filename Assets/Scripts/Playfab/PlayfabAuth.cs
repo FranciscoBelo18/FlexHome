@@ -110,6 +110,21 @@ public class PlayfabAuth : MonoBehaviour
 
         validationText.text = "Login successful!";
         validationMessagePopup.SetActive(true);
+
+        //obtem as definições do utilizador e mete-as em ApplicationVariables audio settings
+        PlayFabClientAPI.GetUserData(new GetUserDataRequest(), 
+            (GetUserDataResult res) => {
+                if (res.Data != null && res.Data.ContainsKey("AudioSettings"))
+                {
+                    string audioSettingsJson = res.Data["AudioSettings"].Value;
+                    var audioSettings = JsonConvert.DeserializeObject<Dictionary<string, bool>>(audioSettingsJson);
+                    ApplicationVariables.AudioSettings = audioSettings;
+                }
+            },
+            (PlayFabError err) => {
+                Debug.LogError("Failed to get user data: " + err.GenerateErrorReport());
+            });
+
         Invoke(nameof(DisableValidationMessageObject), 2f);
     }
 

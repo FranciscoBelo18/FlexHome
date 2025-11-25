@@ -22,6 +22,12 @@ public class SettingsPopUpManager : MonoBehaviour
     {
         Debug.Log("User data retrieved successfully.");
 
+        if (AudioSettingsObjects == null || AudioSettingsObjects.Length == 0)
+        {
+            Debug.LogWarning("No audio settings objects assigned.");
+            return;
+        }
+        
         foreach (var obj in AudioSettingsObjects)
         {
             string SettingGroup = obj.tag;

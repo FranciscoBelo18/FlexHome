@@ -26,56 +26,56 @@ public class WriteLogsToFile : MonoBehaviour
 
     public void WriteRepDataToFile(int jointID, float ActualAngle, float DesiredAngle)
     {
-        string logEntry = "Rep " + (ApplicationVariables.RepsCompleted + 1) + ": Joint " + jointID + " | Actual Angle " + ActualAngle.ToString() + " | Desired Angle " + DesiredAngle.ToString();
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Rep " + (ApplicationVariables.RepsCompleted + 1) + ": Joint " + jointID + " | Actual Angle " + ActualAngle.ToString() + " | Desired Angle " + DesiredAngle.ToString();
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteRepTimeToFile()
     {
-        string logEntry = "Rep " + (ApplicationVariables.RepsCompleted + 1) + " pose reached | " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Rep " + (ApplicationVariables.RepsCompleted + 1) + " pose reached.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteLegPoseTimeToFile(string legSide)
     {
-        string logEntry = "Rep " + (ApplicationVariables.RepsCompleted + 1) + ": " + legSide + " leg pose reached | " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Rep " + (ApplicationVariables.RepsCompleted + 1) + ": " + legSide + " leg pose reached.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteStartingPoseTimeToFile()
     {
-        string logEntry = "Rep " + (ApplicationVariables.RepsCompleted + 1) + ": starting pose reached | " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Rep " + (ApplicationVariables.RepsCompleted + 1) + ": initial pose reached.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WritePausedTimeToFile()
     {
-        string logEntry = "Game paused at: " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Game paused.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteResumedTimeToFile()
     {
-        string logEntry = "Game resumed at: " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Game resumed.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteRestartedSessionTimeToFile()
     {
-        string logEntry = "Game restarted at: " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Game restarted.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }
 
     public void WriteSessionQuitTimeToFile()
     {
-        string logEntry = "Left during game at: " + System.DateTime.Now.ToString("HH:mm:ss");
+        string logEntry = System.DateTime.Now.ToString("HH:mm:ss") + " | Left the game earlier.";
         writer.WriteLine(logEntry);
         writer.Flush();
     }

@@ -98,6 +98,12 @@ public class GameManager : MonoBehaviour
 
             AnalyzeSettings(RepCompletedAudio, backgroundAudio);
 
+            foreach (var setting in ApplicationVariables.AudioSettings)
+            {
+                Debug.Log("Audio Setting - " + setting.Key + ": " + setting.Value);
+            }
+
+
             if (totalPointsText != null)
             {
                 totalPointsText.text = "Total Points: " + ApplicationVariables.PointsEarned;
@@ -842,7 +848,19 @@ public class GameManager : MonoBehaviour
             switch (setting.Key)
             {
                 case "Background Music":
-                    background.mute = !setting.Value;
+                    if (setting.Value) 
+                    {
+                        background.mute = false;
+
+                        if (!background.isPlaying) 
+                        {
+                            background.Play();
+                        }
+                    }
+                    else 
+                    {
+                        background.mute = true;
+                    }
                     break;
                 case "Exercise Rep Completed":
                     RepCompleted.mute = !setting.Value;
