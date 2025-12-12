@@ -13,7 +13,7 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject PopUpTutorialObject;
     public GameObject loginPanel;
     public GameObject registerPanel;
-    private WriteLogsToFile writeLogsToFile;
+    private WriteJSONLogsToFile writeLogsToFile;
 
     public void PlayGame()
     {
@@ -41,10 +41,8 @@ public class ButtonsLogic : MonoBehaviour
 
     public void QuitFromSession()
     {
-        writeLogsToFile = GameObject.Find("LogsManager").GetComponent<WriteLogsToFile>();
-        writeLogsToFile.WriteSessionQuitTimeToFile();
-        writeLogsToFile.WriteSplitLineBetweenExercises();
-        writeLogsToFile.FinishWriting();
+        writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
+        writeLogsToFile.LogEvent("Left Exercise Session");
         ApplicationVariables.SceneToLoad = "MainMenu";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
@@ -171,10 +169,8 @@ public class ButtonsLogic : MonoBehaviour
 
     public void RestartLevel()
     {
-        writeLogsToFile = GameObject.Find("LogsManager").GetComponent<WriteLogsToFile>();
-        writeLogsToFile.WriteRestartedSessionTimeToFile();
-        writeLogsToFile.WriteSplitLineBetweenExercises();
-        writeLogsToFile.FinishWriting();
+        writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
+        writeLogsToFile.LogEvent("Level Restarted");
         ApplicationVariables.SceneToLoad = "GymScene";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
