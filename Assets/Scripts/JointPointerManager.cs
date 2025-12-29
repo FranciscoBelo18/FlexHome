@@ -139,7 +139,15 @@ public class JointPointerManager : MonoBehaviour
         }
         else if (Direction == "Horizontal")
         {
-            float rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+            float rotationZ;
+            if (ApplicationVariables.isLeftLegSide && ApplicationVariables.ActualExercise == "Lateral Lunges")
+            {
+                rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+            }
+            else
+            {
+                rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+            }   
             arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
         }
         

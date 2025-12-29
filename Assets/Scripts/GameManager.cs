@@ -243,8 +243,9 @@ public class GameManager : MonoBehaviour
                     {
                         float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
                         float angleTarget = JointAnglePair[ExJoint];
+                        Vector3 jointPosition = landmarkPoints[ExJoint].transform.position;
                         //writeLogsToFile.WriteRepDataToFile(ExJoint, angle, angleTarget);
-                        writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, joint: ExJoint, actual: angle, desired: angleTarget);
+                        writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, joint: ExJoint, jointX: jointPosition.x, jointY: jointPosition.y, jointZ: jointPosition.z, actual: angle, desired: angleTarget);
                     }
                 }
             }

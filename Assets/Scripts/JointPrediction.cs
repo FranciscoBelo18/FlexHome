@@ -75,23 +75,20 @@ public class JointPrediction : MonoBehaviour
         // 1) ângulo absoluto do anchorDir em graus
         float anchorAngleDeg = Mathf.Atan2(anchorDir.y, anchorDir.x) * Mathf.Rad2Deg;
 
-        // 2) ângulo pretendido somando o angleTarget (em graus)
-        float intendedAngleDeg = anchorAngleDeg + angleTarget;
+        // NOVA LÓGICA:
+        // Em vez de espelhar o resultado final, espelhamos a INTENÇÃO de rotação.
+        // Se for esquerda, invertemos o sinal do angleTarget.
+        float adjustedTarget = ApplicationVariables.isLeftLegSide ? -angleTarget : angleTarget;
 
-        // 3) se for o lado esquerdo, espelhar o ângulo em relação ao eixo vertical do corpo
-        //    geometricamente, espelho em X => angle' = 180 - angle
-        float finalAngleDeg = ApplicationVariables.isLeftLegSide ? (180f - intendedAngleDeg) : intendedAngleDeg;
+        // 2) ângulo final é simplesmente a base + o ajuste
+        float finalAngleDeg = anchorAngleDeg + adjustedTarget;
 
-        // normalizar para intervalo [-180,180] (opcional, ajuda a manter valores limpos)
-        finalAngleDeg = Mathf.Repeat(finalAngleDeg + 180f, 360f) - 180f;
-
-        // 4) converter de volta para vetor direção e posição desejada
+        // 3) converter para radianos
         float finalAngleRad = finalAngleDeg * Mathf.Deg2Rad;
+
         Vector3 desiredDir = new Vector3(Mathf.Cos(finalAngleRad), Mathf.Sin(finalAngleRad), 0f).normalized;
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
-
-        // debug (opcional) para ver a linha na Scene view
-        Debug.DrawLine(mainJointPosition, desiredPosition, color, 0.1f);
+        desiredPosition.z = mainJointPosition.z;
 
         if (jointPointerManager != null)
         {
