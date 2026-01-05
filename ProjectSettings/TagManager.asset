@@ -23,6 +23,8 @@ TagManager:
   - MediumGoal
   - HighestGoal
   - AudioSettings
+  - DemoGoals
+  - NormalGoals
   layers:
   - Default
   - TransparentFX

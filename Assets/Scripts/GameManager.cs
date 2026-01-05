@@ -57,8 +57,8 @@ public class GameManager : MonoBehaviour
     public VideoManager videoManager;
     private string leaderboardName;
     public GameObject ScreenDisplay;
-    public WriteLogsToFile writeLogsToFile;
     public WriteJSONLogsToFile writeJSONLogsToFile;
+    public GameObject[] goals;
 
     void Start()
     {
@@ -81,7 +81,8 @@ public class GameManager : MonoBehaviour
         GetExercises();
         jointAngleCalculation.GetJointsToCalculateAngles();
         isInitialized = true;
-        if (ApplicationVariables.GameVersion == "Dynamic")
+        InitializeGoalsBoard();
+        if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
         {
             jointPrediction.GetJointPairsToCorrectFromPlayfab();
         }
@@ -220,6 +221,38 @@ public class GameManager : MonoBehaviour
                     SettingsButton.SetActive(false);
                     PopUpExercisesCompleted.SetActive(true);
                     DisplayResultsOnPopup();
+                }
+            }
+        }
+    }
+
+    private void InitializeGoalsBoard()
+    {
+        if (ApplicationVariables.isDemoVersion)
+        {
+            foreach (var goal in goals)
+            {
+                if (goal.tag == "DemoGoals")
+                {
+                    goal.SetActive(true);
+                }
+                else if (goal.tag == "NormalGoals")
+                {
+                    goal.SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            foreach (var goal in goals)
+            {
+                if (goal.tag == "DemoGoals")
+                {
+                    goal.SetActive(false);
+                }
+                else if (goal.tag == "NormalGoals")
+                {
+                    goal.SetActive(true);
                 }
             }
         }
@@ -706,7 +739,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckRepsCompleted()
     {
-        if (ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps)
+        if ((ApplicationVariables.isDemoVersion == false &&ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -718,7 +751,7 @@ public class GameManager : MonoBehaviour
             pointsSystem.AddPointsExerciseCompleted();
             FinishExercise();
         }
-        else if (ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal)
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -729,7 +762,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if (ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal)
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
         {
             foreach (GameObject line in StrikeThroughLines)
             {

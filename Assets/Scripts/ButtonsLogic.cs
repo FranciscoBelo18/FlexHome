@@ -14,6 +14,7 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject loginPanel;
     public GameObject registerPanel;
     private WriteJSONLogsToFile writeLogsToFile;
+    public GameObject toggle;
 
     public void PlayGame()
     {
@@ -63,8 +64,9 @@ public class ButtonsLogic : MonoBehaviour
     public void TypeOfExercisesSelected(GameObject clickedButton)
     {
         //Debug.Log("Tag do botao clicado: " + clickedButton.tag);
-        if (dropdown != null)
+        if (dropdown != null && toggle != null)
         {
+            Toggle toggleComponent = toggle.GetComponent<Toggle>();
             TMP_Dropdown dropdownComponent = dropdown.GetComponent<TMP_Dropdown>();
             int selectedIndex = dropdownComponent.value;
             //Debug.Log("Selected index: " + selectedIndex);  
@@ -79,6 +81,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "LowerBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");
@@ -87,6 +90,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "UpperBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");
@@ -95,6 +99,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "FullBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");

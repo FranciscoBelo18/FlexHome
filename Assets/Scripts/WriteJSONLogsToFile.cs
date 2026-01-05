@@ -52,11 +52,14 @@ public class WriteJSONLogsToFile : MonoBehaviour
         if (!root.sessions.ContainsKey(currentUser))
             root.sessions[currentUser] = new List<UserSession>();
 
+        string actualGameMode = ApplicationVariables.isDemoVersion ? "Demo" : "Normal";
+
         currentSession = new UserSession()
         {
             date = System.DateTime.Now.ToString("dd/MM/yyyy"),
             time = System.DateTime.Now.ToString("HH:mm:ss"),
             gameVersion = ApplicationVariables.GameVersion,
+            gameMode = actualGameMode,
             exercise = ApplicationVariables.ActualExercise,
             events = new List<EventData>()
         };

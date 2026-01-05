@@ -7,6 +7,7 @@ public class TutorialManager : MonoBehaviour
     public GameObject popUpStartTutorial;
     public GameObject popUpTutorialCompleted;
     public AudioSource backgroundAudio;
+    public GameObject[] goals;
 
     void Start()
     {
@@ -15,6 +16,34 @@ public class TutorialManager : MonoBehaviour
             tutorialPanel.SetActive(true);
             popUpStartTutorial.SetActive(true);
             popUpTutorialCompleted.SetActive(false);
+            if (ApplicationVariables.isDemoVersion)
+            {
+                foreach (var goal in goals)
+                {
+                    if (goal.tag == "DemoGoals")
+                    {
+                        goal.SetActive(true);
+                    }
+                    else if (goal.tag == "NormalGoals")
+                    {
+                        goal.SetActive(false);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var goal in goals)
+                {
+                    if (goal.tag == "DemoGoals")
+                    {
+                        goal.SetActive(false);
+                    }
+                    else if (goal.tag == "NormalGoals")
+                    {
+                        goal.SetActive(true);
+                    }
+                }
+            }
             tutorialAnimator = tutorialPanel.GetComponent<Animator>();
             tutorialAnimator.SetInteger("Change", 0);
         }

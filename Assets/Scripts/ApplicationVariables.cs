@@ -36,4 +36,8 @@ public static class ApplicationVariables
     public static Dictionary<int, Vector3> PredictedPositions = new Dictionary<int, Vector3>();
     public static bool isLeftLegSide = false;
     public static bool firstTimeAfterPopUpOutsideBounds = true;
+    public static bool isDemoVersion = false;
+    public static int DemoLowestRepsGoal = 1;
+    public static int DemoMediumRepsGoal = 3;
+    public static int DemoDesiredReps = 5;
 }
