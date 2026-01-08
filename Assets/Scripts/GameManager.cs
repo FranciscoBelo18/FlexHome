@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, int> ExerciseResults = new Dictionary<string, int>();
     public TextMeshProUGUI ExerciseResultsText;
     public TextMeshProUGUI TotalPointsText;
-    private bool isWaitingForBaseReturn = false;
     public Timer timer;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
@@ -161,17 +160,13 @@ public class GameManager : MonoBehaviour
                     UserPoseDisplay.SetActive(true);
                     DemoVideoDisplay.SetActive(false);
                     StartCoroutine(CacheLandmarkPointsWhenReady());
-                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    /*if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                     {
                         if (!timer.IsTimerPaused())
                         {
                             Debug.Log("Some essential points are out of bounds of the RawImage.");
                             PopUpWarningOutOfBounds.SetActive(true);
                             timer.PauseTimer();
-                            if (ApplicationVariables.GameVersion == "Dynamic")
-                            {
-                                jointPointerManager.ClearAllPointers();
-                            }
                         }
                     }
                     else
@@ -181,11 +176,15 @@ public class GameManager : MonoBehaviour
                         {
                             timer.ResumeTimer();
                         }
-                    }
+                    }*/
 
                     if (!timer.IsTimerPaused())
                     {
                         AnalyzePose();
+                    }
+                    else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
+                    {
+                        jointPointerManager.ClearAllPointers();
                     }
                 }
                 if (SettingsPopUp.activeSelf)
@@ -268,6 +267,8 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
+            Dictionary<int, JointData> jointDataDict = new Dictionary<int, JointData>();
+
             foreach (var ExJoint in activeExerciseJoints)
             {
                 foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
@@ -276,12 +277,24 @@ public class GameManager : MonoBehaviour
                     {
                         float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
                         float angleTarget = JointAnglePair[ExJoint];
-                        Vector3 jointPosition = landmarkPoints[ExJoint].transform.position;
+                        Vector3 jointPosition = landmarkPoints[ExJoint].transform.localPosition;
+                        
+                        JointData jointData = new JointData()
+                        {
+                            jointX = jointPosition.x,
+                            jointY = jointPosition.y,
+                            actualAngle = angle,
+                            desiredAngle = angleTarget
+                        };
+
+                        jointDataDict.Add(ExJoint, jointData);
+                        
                         //writeLogsToFile.WriteRepDataToFile(ExJoint, angle, angleTarget);
-                        writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, joint: ExJoint, jointX: jointPosition.x, jointY: jointPosition.y, jointZ: jointPosition.z, actual: angle, desired: angleTarget);
+                        //writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, joint: ExJoint, jointX: jointPosition.x, jointY: jointPosition.y, jointZ: jointPosition.z, actual: angle, desired: angleTarget);
                     }
                 }
             }
+            writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, jointData: jointDataDict);
             yield return new WaitForSeconds(1f);
         }
     }
@@ -510,7 +523,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
-            if (allJointsAreGood && !isWaitingForBaseReturn)
+            if (allJointsAreGood && !ApplicationVariables.isWaitingForBaseReturn)
             {
                 StartCoroutine(ExerciseRepCompleted());
             }
@@ -522,7 +535,7 @@ public class GameManager : MonoBehaviour
     {
         var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
-        isWaitingForBaseReturn = true;
+        ApplicationVariables.isWaitingForBaseReturn = true;
         StartCoroutine(PlaySoundWithBackground());
 
         while (!isInBasePosition())
@@ -548,16 +561,16 @@ public class GameManager : MonoBehaviour
                 ChangeActiveLegText();
             }
         }
-        isWaitingForBaseReturn = false;
+        ApplicationVariables.isWaitingForBaseReturn = false;
     }
 
     private void CheckAllJointsColor()
     {
         bool allGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green);
 
-        if (allGreen && !isWaitingForBaseReturn)
+        if (allGreen && !ApplicationVariables.isWaitingForBaseReturn)
         {
-            isWaitingForBaseReturn = true;
+            ApplicationVariables.isWaitingForBaseReturn = true;
 
             jointPointerManager.createPointers = false;
 
@@ -666,7 +679,7 @@ public class GameManager : MonoBehaviour
             ChangeActiveLegText();
         }
 
-        isWaitingForBaseReturn = false;
+        ApplicationVariables.isWaitingForBaseReturn = false;
         jointPointerManager.createPointers = true;
     }
     

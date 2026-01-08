@@ -40,4 +40,5 @@ public static class ApplicationVariables
     public static int DemoLowestRepsGoal = 1;
     public static int DemoMediumRepsGoal = 3;
     public static int DemoDesiredReps = 5;
+    public static bool isWaitingForBaseReturn = false;
 }

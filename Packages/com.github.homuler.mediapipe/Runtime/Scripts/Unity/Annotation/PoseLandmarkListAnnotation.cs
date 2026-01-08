@@ -146,7 +146,10 @@ namespace Mediapipe.Unity
         _landmarkListAnnotation.Draw(target, visualizeZ);
         if (ApplicationVariables.GameVersion == "Standard" || ApplicationVariables.GameVersion == "Merged")
         {
-          ApplyMaskStandardVersion(mask);
+          if (!ApplicationVariables.isWaitingForBaseReturn)
+          {
+            ApplyMaskStandardVersion(mask);
+          }    
         }
         else
         {

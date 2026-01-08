@@ -69,7 +69,7 @@ public class WriteJSONLogsToFile : MonoBehaviour
         Save();
     }
 
-    public void LogEvent(string message, int? rep = null, int? joint = null, float? jointX = null, float? jointY = null, float? jointZ = null, float? actual = null, float? desired = null)
+    public void LogEvent(string message, int? rep = null, Dictionary<int, JointData> jointData = null)
     {
         if (currentSession == null)
         {
@@ -81,12 +81,7 @@ public class WriteJSONLogsToFile : MonoBehaviour
         {
             time = System.DateTime.Now.ToString("HH:mm:ss"),
             rep = rep,
-            joint = joint,
-            jointX = jointX,
-            jointY = jointY,
-            jointZ = jointZ,
-            actualAngle = actual,
-            desiredAngle = desired,
+            jointData = jointData,
             message = message
         };
 
