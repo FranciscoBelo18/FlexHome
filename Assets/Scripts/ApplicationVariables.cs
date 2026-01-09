@@ -19,9 +19,9 @@ public static class ApplicationVariables
     public static float TimeLimitToCompleteExercise = 30;
     public static float TimeToDisplayExerciseDemo = 10;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
-    public static int GoodPerformanceRange = 20;
-    public static int AveragePerformanceRange = 40;
-    public static int BadPerformanceRange = 80;
+    public static float GoodPerformanceRange = 20;
+    public static float AveragePerformanceRange = 40;
+    public static float BadPerformanceRange = 80;
     public static int RepsCompleted = 0;
     public static int DesiredReps = 12;
     public static int LowestGoalPoints = 50;

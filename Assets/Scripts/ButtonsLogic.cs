@@ -15,6 +15,7 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject registerPanel;
     private WriteJSONLogsToFile writeLogsToFile;
     public GameObject toggle;
+    private float PercentageToIncreaseDifficulty = 0.05f;
 
     public void PlayGame()
     {
@@ -191,5 +192,21 @@ public class ButtonsLogic : MonoBehaviour
     {
         loginPanel.SetActive(false);
         registerPanel.SetActive(true);
+    }
+
+    public void IncreaseDifficulty()
+    {
+        float multiplicador = 1 - PercentageToIncreaseDifficulty;
+        ApplicationVariables.GoodPerformanceRange *= multiplicador;
+        ApplicationVariables.AveragePerformanceRange *= multiplicador;
+        ApplicationVariables.BadPerformanceRange *= multiplicador;
+    }
+
+    public void DecreaseDifficulty()
+    {
+        float divisor = 1 - PercentageToIncreaseDifficulty;
+        ApplicationVariables.GoodPerformanceRange /= divisor;
+        ApplicationVariables.AveragePerformanceRange /= divisor;
+        ApplicationVariables.BadPerformanceRange /= divisor;
     }
 }
