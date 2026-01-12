@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour
     public GameObject ScreenDisplay;
     public WriteJSONLogsToFile writeJSONLogsToFile;
     public GameObject[] goals;
+    public GameObject[] DisplayBoundaryObjects;
 
     void Start()
     {
@@ -160,7 +161,7 @@ public class GameManager : MonoBehaviour
                     UserPoseDisplay.SetActive(true);
                     DemoVideoDisplay.SetActive(false);
                     StartCoroutine(CacheLandmarkPointsWhenReady());
-                    /*if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                     {
                         if (!timer.IsTimerPaused())
                         {
@@ -176,10 +177,11 @@ public class GameManager : MonoBehaviour
                         {
                             timer.ResumeTimer();
                         }
-                    }*/
+                    }
 
                     if (!timer.IsTimerPaused())
                     {
+                        AnalyzeBodyPPositioning();
                         AnalyzePose();
                     }
                     else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
@@ -411,6 +413,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AnalyzeBodyPositioning()
+    {
+        Vector3 leftboundary;
+        Vector3 rightboundary;
+        foreach (var boundary in DisplayBoundaryObjects)
+        {
+            if (boundary.name.Contains("Left"))
+            {
+                leftboundary = boundary.transform.position;
+            }
+            else if (boundary.name.Contains("Right"))
+            {
+                rightboundary = boundary.transform.position;
+            }
+        }
+
+        Vector3 NosePosition = landmarkPoints[0].transform.position;
+
+        float DistanceToLeftBoundary = Mathf.Abs(NosePosition.x - leftboundary.x);
+        float DistanceToRightBoundary = Mathf.Abs(NosePosition.x - rightboundary.x);
+
+        if(DistanceToLeftBoundary >= DistanceToRightBoundary)
+        {
+            ApplicationVariables.PlayerPosition = "Right";
+        }
+        else
+        {
+            ApplicationVariables.PlayerPosition = "Left";
+        }
+    }
+
     public void AnalyzePose()
     {
         if (ApplicationVariables.GameVersion == "Standard")
@@ -490,7 +523,7 @@ public class GameManager : MonoBehaviour
                             {
                                 Direction = "Horizontal";
                             }
-                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction, DisplayBoundaryObjects);
                         }
                         else
                         {
