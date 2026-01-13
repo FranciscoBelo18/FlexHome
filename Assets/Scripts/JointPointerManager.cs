@@ -47,6 +47,7 @@ public class JointPointerManager : MonoBehaviour
             // Se o prefab não corresponder à cor desejada, troca
             if (arrow == null || !IsSamePrefab(arrow, desiredPrefab))
             {
+                Destroy(arrow);
                 arrow = Instantiate(desiredPrefab, adjustedArrowPosition, Quaternion.identity); // não parenta
                 activeArrows[baseJoint] = arrow;
             }
@@ -78,7 +79,7 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    public void CreatePointerForStaticFeet(int jointToPredict, Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction)
+    public void CreatePointerForStaticFeet(int jointToPredict, Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction, GameObject[] DisplayBoundaryObjects = null)
     {
         Vector3 adjustedArrowPosition = GetUpdatedPosition(baseJoint.position, jointToPredict);
         if (!createPointers) return;
@@ -143,13 +144,13 @@ public class JointPointerManager : MonoBehaviour
             float rotationZ;
             if (ApplicationVariables.ActualExercise == "Lateral Lunges")
             {
-                if (ApplicationVariables.isLeftLegSide && ApplicationVariables.ActualExercise)
+                if (ApplicationVariables.isLeftLegSide)
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
                 }
                 else
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
                 }  
             }
             else

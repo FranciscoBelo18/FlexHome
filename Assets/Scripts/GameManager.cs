@@ -181,7 +181,7 @@ public class GameManager : MonoBehaviour
 
                     if (!timer.IsTimerPaused())
                     {
-                        AnalyzeBodyPPositioning();
+                        AnalyzeBodyPositioning();
                         AnalyzePose();
                     }
                     else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
@@ -191,6 +191,7 @@ public class GameManager : MonoBehaviour
                 }
                 if (SettingsPopUp.activeSelf)
                 {
+                    jointPointerManager.ClearAllPointers();
                     Time.timeScale = 0f;
                     SettingsButton.SetActive(false);
                     if (ApplicationVariables.ActualState == "ExerciseDemo")
@@ -415,15 +416,15 @@ public class GameManager : MonoBehaviour
 
     public void AnalyzeBodyPositioning()
     {
-        Vector3 leftboundary;
-        Vector3 rightboundary;
+        Vector3 leftboundary = Vector3.zero;
+        Vector3 rightboundary = Vector3.zero;
         foreach (var boundary in DisplayBoundaryObjects)
         {
             if (boundary.name.Contains("Left"))
             {
                 leftboundary = boundary.transform.position;
             }
-            else if (boundary.name.Contains("Right"))
+            else
             {
                 rightboundary = boundary.transform.position;
             }
@@ -509,7 +510,7 @@ public class GameManager : MonoBehaviour
                             if (ExJoint == 24 || ExJoint == 23)
                             {
                                 Direction = "Vertical";
-                                jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                                jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction, null);
                             }
                         }
                         else if (ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
@@ -785,7 +786,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckRepsCompleted()
     {
-        if ((ApplicationVariables.isDemoVersion == false &&ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
+        if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -797,7 +798,7 @@ public class GameManager : MonoBehaviour
             pointsSystem.AddPointsExerciseCompleted();
             FinishExercise();
         }
-        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoMediumRepsGoal))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -808,7 +809,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoLowestRepsGoal))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
