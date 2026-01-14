@@ -79,7 +79,7 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    public void CreatePointerForStaticFeet(int jointToPredict, Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction, GameObject[] DisplayBoundaryObjects = null)
+    public void CreatePointerForStaticFeet(int jointToPredict, Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction)
     {
         Vector3 adjustedArrowPosition = GetUpdatedPosition(baseJoint.position, jointToPredict);
         if (!createPointers) return;
@@ -146,22 +146,22 @@ public class JointPointerManager : MonoBehaviour
             {
                 if (ApplicationVariables.isLeftLegSide)
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
                 }
                 else
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
                 }  
             }
             else
             {
                 if (ApplicationVariables.PlayerPosition == "Left")
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
                 }
                 else
                 {
-                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
                 }
             }
              

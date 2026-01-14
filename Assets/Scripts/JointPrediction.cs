@@ -97,9 +97,9 @@ public class JointPrediction : MonoBehaviour
     }
 
     
-    public void PredictPointerForStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints, string Direction, GameObject[] DisplayBoundaryObjects)
+    public void PredictPointerForStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints, string Direction)
     {
-        jointPointerManager.CreatePointerForStaticFeet(jointToAnalyze, landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction, Direction, DisplayBoundaryObjects);
+        jointPointerManager.CreatePointerForStaticFeet(jointToAnalyze, landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction, Direction);
     }
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)

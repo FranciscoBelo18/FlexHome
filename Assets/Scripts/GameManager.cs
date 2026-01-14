@@ -422,25 +422,37 @@ public class GameManager : MonoBehaviour
         {
             if (boundary.name.Contains("Left"))
             {
-                leftboundary = boundary.transform.position;
+                leftboundary = boundary.transform.localPosition;
             }
             else
             {
-                rightboundary = boundary.transform.position;
+                rightboundary = boundary.transform.localPosition;
             }
         }
 
-        Vector3 NosePosition = landmarkPoints[0].transform.position;
+        Vector3 NosePosition = landmarkPoints[0].transform.localPosition;
 
         float DistanceToLeftBoundary = Mathf.Abs(NosePosition.x - leftboundary.x);
         float DistanceToRightBoundary = Mathf.Abs(NosePosition.x - rightboundary.x);
 
         if(DistanceToLeftBoundary >= DistanceToRightBoundary)
         {
+            if (ApplicationVariables.PlayerPosition != "Right" && ApplicationVariables.ActualExercise == "Lunges")
+            {
+                jointPointerManager.ClearAllPointers();
+            }
             ApplicationVariables.PlayerPosition = "Right";
+            Debug.LogWarning("Nose position: " + NosePosition.x);
+            Debug.LogWarning("Left Boundary position: " + leftboundary.x);
+            Debug.LogWarning("Right Boundary position: " + rightboundary.x);
+            Debug.LogWarning("Player Position: " + ApplicationVariables.PlayerPosition);
         }
         else
         {
+            if (ApplicationVariables.PlayerPosition != "Left" && ApplicationVariables.ActualExercise == "Lunges")
+            {
+                jointPointerManager.ClearAllPointers();
+            }
             ApplicationVariables.PlayerPosition = "Left";
         }
     }
@@ -510,7 +522,7 @@ public class GameManager : MonoBehaviour
                             if (ExJoint == 24 || ExJoint == 23)
                             {
                                 Direction = "Vertical";
-                                jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction, null);
+                                jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
                             }
                         }
                         else if (ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
@@ -524,7 +536,8 @@ public class GameManager : MonoBehaviour
                             {
                                 Direction = "Horizontal";
                             }
-                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction, DisplayBoundaryObjects);
+                            //Debug.LogWarning("PLayer Position: " + ApplicationVariables.PlayerPosition);
+                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
                         }
                         else
                         {
