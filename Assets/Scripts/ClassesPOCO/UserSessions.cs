@@ -3,5 +3,5 @@ using System.Collections.Generic;
 
 public class UserSessions
 {
-    public Dictionary<string, List<UserSession>> sessions = new();
+    public List<UserSession> sessions = new List<UserSession>();
 }

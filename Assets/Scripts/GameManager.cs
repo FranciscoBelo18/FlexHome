@@ -215,6 +215,7 @@ public class GameManager : MonoBehaviour
             {
                 if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
                 {
+                    writeJSONLogsToFile.ForceSave();
                     TimerObject.SetActive(false);
                     UserPoseDisplay.SetActive(false);
                     DemoVideoDisplay.SetActive(false);
@@ -291,14 +292,11 @@ public class GameManager : MonoBehaviour
                         };
 
                         jointDataDict.Add(ExJoint, jointData);
-                        
-                        //writeLogsToFile.WriteRepDataToFile(ExJoint, angle, angleTarget);
-                        //writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, joint: ExJoint, jointX: jointPosition.x, jointY: jointPosition.y, jointZ: jointPosition.z, actual: angle, desired: angleTarget);
                     }
                 }
             }
             writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, jointData: jointDataDict);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -349,8 +347,6 @@ public class GameManager : MonoBehaviour
         else
         {
             ApplicationVariables.isAllExercisesCompleted = true;
-            //writeLogsToFile.WriteSplitLineBetweenExercises();
-            //writeLogsToFile.FinishWriting();
             writeJSONLogsToFile.LogEvent(message: "All exercises completed");
         }
     }
@@ -590,17 +586,13 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        //writeLogsToFile.WriteStartingPoseTimeToFile();
-        writeJSONLogsToFile.LogEvent(message: "Returned to base position", rep: ApplicationVariables.RepsCompleted);
-
         if (currentExerciseData != null)
         {
             if (currentExerciseData.together)
             {
                 pointsSystem.AddPointsRepCompleted();
                 ApplicationVariables.RepsCompleted++;
-                //writeLogsToFile.WriteStartingPoseTimeToFile();
-                writeJSONLogsToFile.LogEvent(message: "Completed rep " + ApplicationVariables.RepsCompleted);
+                writeJSONLogsToFile.LogEvent(message: "Rep Completed", rep: ApplicationVariables.RepsCompleted);
             }
             else
             {
@@ -631,19 +623,16 @@ public class GameManager : MonoBehaviour
             {
                 if (currentExerciseData.together)
                 {
-                    //writeLogsToFile.WriteRepTimeToFile();
                     writeJSONLogsToFile.LogEvent(message: "Reached Exercise Pose", rep: ApplicationVariables.RepsCompleted + 1);
                 }
                 else
                 {
                     if(activeLegText.text == "Right Leg")
                     {
-                        //writeLogsToFile.WriteLegPoseTimeToFile("Right");
                         writeJSONLogsToFile.LogEvent(message: "Reached Right Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
                     }
                     else
                     {
-                        //writeLogsToFile.WriteLegPoseTimeToFile("Left");
                         writeJSONLogsToFile.LogEvent(message: "Reached Left Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
                     }
                 }
@@ -684,6 +673,7 @@ public class GameManager : MonoBehaviour
                 {
                     ApplicationVariables.isLeftLegSide = true;
                 }
+                writeJSONLogsToFile.LogEvent(message: "Switched to Left Leg", rep: ApplicationVariables.RepsCompleted + 1);
             }
             else
             {
@@ -691,6 +681,11 @@ public class GameManager : MonoBehaviour
                 if (currentExerciseData != null && currentExerciseData.LateralFrontFacing)
                 {
                     ApplicationVariables.isLeftLegSide = false;
+                }
+
+                if (ApplicationVariables.RepsCompleted < ApplicationVariables.DesiredReps)
+                {
+                    writeJSONLogsToFile.LogEvent(message: "Switched to Right Leg", rep: ApplicationVariables.RepsCompleted + 1);
                 }
             }
         }
@@ -704,20 +699,15 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
         
-        writeJSONLogsToFile.LogEvent(message: "Returning to base position", rep: ApplicationVariables.RepsCompleted);
-        
         while (!isInBasePosition())
         {
             yield return null;
         }
 
-        //writeLogsToFile.WriteStartingPoseTimeToFile();
-
         if (currentExerciseData.together)
         {
             pointsSystem.AddPointsRepCompleted();
             ApplicationVariables.RepsCompleted++;
-            //writeLogsToFile.WriteStartingPoseTimeToFile();
             writeJSONLogsToFile.LogEvent(message: "Rep Completed", rep: ApplicationVariables.RepsCompleted);
         }
         else
@@ -837,6 +827,8 @@ public class GameManager : MonoBehaviour
 
     private void FinishExercise()
     {
+        writeJSONLogsToFile.LogEvent(message: "Exercise Completed");
+        writeJSONLogsToFile.ForceSave();
         float timeLeft = timer.GetTime();
         int timeInt = Mathf.FloorToInt(timeLeft);
         pointsSystem.AddPointsFromGoal(timeInt * 2);

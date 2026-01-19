@@ -41,6 +41,6 @@ public static class ApplicationVariables
     public static int DemoMediumRepsGoal = 3;
     public static int DemoDesiredReps = 5;
     public static bool isWaitingForBaseReturn = false;
-    public static float MergedArrowPositionDifference = 0.12f;
+    public static float MergedArrowPositionDifference = 0.105f;
     public static string PlayerPosition = "";
 }

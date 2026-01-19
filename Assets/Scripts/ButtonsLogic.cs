@@ -45,6 +45,7 @@ public class ButtonsLogic : MonoBehaviour
     {
         writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
         writeLogsToFile.LogEvent("Left Exercise Session");
+        writeLogsToFile.ForceSave();
         ApplicationVariables.SceneToLoad = "MainMenu";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
@@ -177,6 +178,7 @@ public class ButtonsLogic : MonoBehaviour
     {
         writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
         writeLogsToFile.LogEvent("Level Restarted");
+        writeLogsToFile.ForceSave();
         ApplicationVariables.SceneToLoad = "GymScene";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");

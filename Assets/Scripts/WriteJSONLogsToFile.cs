@@ -5,68 +5,72 @@ using Newtonsoft.Json;
 
 public class WriteJSONLogsToFile : MonoBehaviour
 {
-    private string filename = "MainTestingLogs.json";
-    private string filePath;
-    private UserSessions root;
+    private string folderName = "UserLogs";
+    private string currentFilePath;
+    private UserSessions root; 
     private UserSession currentSession;
-    private string currentUser;
-
-    void Start()
+    
+    private void Awake()
     {
-        filePath = Path.Combine(Application.persistentDataPath, filename);
-
-        Debug.LogWarning("JSON log file path: " + filePath);
-
-        Load();
-    }
-
-    private void Load()
-    {
-        if (File.Exists(filePath))
+        string folderPath = Path.Combine(Application.persistentDataPath, folderName);
+        if (!Directory.Exists(folderPath))
         {
-            string json = File.ReadAllText(filePath);
-
-            try
-            {
-                root = JsonConvert.DeserializeObject<UserSessions>(json);
-
-                if (root == null)
-                    root = new UserSessions();
-            }
-            catch
-            {
-                Debug.LogError("Erro ao ler JSON. Criando novo ficheiro...");
-                root = new UserSessions();
-            }
-        }
-        else
-        {
-            root = new UserSessions();
+            Directory.CreateDirectory(folderPath);
         }
     }
 
     public void StartNewSession()
     {
-        currentUser = ApplicationVariables.userLoggedName;
+        string userID = ApplicationVariables.userLoggedName;
+        currentFilePath = Path.Combine(Application.persistentDataPath, folderName, userID + ".json");
+        Debug.Log("Log File Path: " + currentFilePath);
 
-        if (!root.sessions.ContainsKey(currentUser))
-            root.sessions[currentUser] = new List<UserSession>();
+        LoadUserFile();
 
         string actualGameMode = ApplicationVariables.isDemoVersion ? "Demo" : "Normal";
 
         currentSession = new UserSession()
         {
             date = System.DateTime.Now.ToString("dd/MM/yyyy"),
-            time = System.DateTime.Now.ToString("HH:mm:ss"),
+            time = System.DateTime.Now.ToString("HH:mm:ss.fff"),  
             gameVersion = ApplicationVariables.GameVersion,
             gameMode = actualGameMode,
             exercise = ApplicationVariables.ActualExercise,
             events = new List<EventData>()
         };
 
-        root.sessions[currentUser].Add(currentSession);
+        root.sessions.Add(currentSession);
 
         Save();
+    }
+
+    private void LoadUserFile()
+    {
+        if (File.Exists(currentFilePath))
+        {
+            try
+            {
+                string json = File.ReadAllText(currentFilePath);
+                root = JsonConvert.DeserializeObject<UserSessions>(json);
+
+                if (root == null) InitializeNewRoot();
+            }
+            catch
+            {
+                Debug.LogError("Erro ao ler JSON do User. A criar novo...");
+                InitializeNewRoot();
+            }
+        }
+        else
+        {
+            InitializeNewRoot();
+        }
+    }
+
+    private void InitializeNewRoot()
+    {
+        root = new UserSessions(); 
+        root.sessions = new List<UserSession>();
     }
 
     public void LogEvent(string message, int? rep = null, Dictionary<int, JointData> jointData = null)
@@ -79,19 +83,26 @@ public class WriteJSONLogsToFile : MonoBehaviour
 
         EventData evt = new EventData()
         {
-            time = System.DateTime.Now.ToString("HH:mm:ss"),
+            time = System.DateTime.Now.ToString("HH:mm:ss.fff"),
             rep = rep,
             jointData = jointData,
             message = message
         };
 
         currentSession.events.Add(evt);
+    }
+
+    public void ForceSave()
+    {
         Save();
+        Debug.Log("Logs gravados com sucesso.");
     }
 
     private void Save()
     {
+        if (root == null) return;
+
         string json = JsonConvert.SerializeObject(root, Formatting.Indented);
-        File.WriteAllText(filePath, json);
+        File.WriteAllText(currentFilePath, json);
     }
 }
