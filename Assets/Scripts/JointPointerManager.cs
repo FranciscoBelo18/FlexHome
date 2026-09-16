@@ -136,8 +136,17 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.position = adjustedArrowPosition;
         if (Direction == "Vertical")
         {
-            float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
-            arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            if (ApplicationVariables.ActualExercise == "Knee Hug")
+            {
+                float rotationZ = angleDifferenceForPrediction > 0 ? 90f : -90f;
+                arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            }
+            else
+            {
+                float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
+                arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            }
+            
         }
         else if (Direction == "Horizontal")
         {
@@ -178,13 +187,15 @@ public class JointPointerManager : MonoBehaviour
         {
             float deslocamento = ApplicationVariables.MergedArrowPositionDifference;
 
-            if (jointToPredict % 2 == 0)
-            {
-                finalPos.x -= deslocamento;
-            }
-            else
-            {
-                finalPos.x += deslocamento;
+            if (jointToPredict != 27 && jointToPredict != 28){
+                if (jointToPredict % 2 == 0)
+                {
+                    finalPos.x -= deslocamento;
+                }
+                else
+                {
+                    finalPos.x += deslocamento;
+                }
             }
         }
         return finalPos;

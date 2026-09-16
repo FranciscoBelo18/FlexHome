@@ -78,7 +78,9 @@ public class Timer : MonoBehaviour
         }
         else
         {
-            ApplicationVariables.ActualState = "ExerciseDemo";
+            logger.LogEvent("Exercise Time Ended");
+            logger.ForceSave();
+            ApplicationVariables.ActualState = "ExerciseDemo";  
         }
     }
 
