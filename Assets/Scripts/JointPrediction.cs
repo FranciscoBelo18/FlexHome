@@ -65,28 +65,41 @@ public class JointPrediction : MonoBehaviour
 
         if (anchorJoint < 0 || anchorJoint >= landmarkPoints.Length) return;
 
-        // Mesmo que o anchor esteja desativado, usamos sua posição
         Vector3 anchorPosition = landmarkPoints[anchorJoint] != null
             ? landmarkPoints[anchorJoint].transform.position
             : mainJointPosition + Vector3.right; // fallback
 
+        // direção base do anchor para o mainJoint
         Vector3 anchorDir = (anchorPosition - mainJointPosition).normalized;
-        Quaternion rotation = Quaternion.AngleAxis(angleTarget, Vector3.forward);
-        Vector3 desiredDir = rotation * anchorDir;
+
+        // 1) ângulo absoluto do anchorDir em graus
+        float anchorAngleDeg = Mathf.Atan2(anchorDir.y, anchorDir.x) * Mathf.Rad2Deg;
+
+        // NOVA LÓGICA:
+        // Em vez de espelhar o resultado final, espelhamos a INTENÇÃO de rotação.
+        // Se for esquerda, invertemos o sinal do angleTarget.
+        float adjustedTarget = ApplicationVariables.isLeftLegSide ? -angleTarget : angleTarget;
+
+        // 2) ângulo final é simplesmente a base + o ajuste
+        float finalAngleDeg = anchorAngleDeg + adjustedTarget;
+
+        // 3) converter para radianos
+        float finalAngleRad = finalAngleDeg * Mathf.Deg2Rad;
+
+        Vector3 desiredDir = new Vector3(Mathf.Cos(finalAngleRad), Mathf.Sin(finalAngleRad), 0f).normalized;
         Vector3 desiredPosition = mainJointPosition + desiredDir * distance;
+        desiredPosition.z = mainJointPosition.z;
 
         if (jointPointerManager != null)
         {
-            jointPointerManager.CreatePointer(landmarkPoints[jointToPredict].transform, desiredPosition, color, feetOnTheGround);
+            jointPointerManager.CreatePointer(jointToPredict, landmarkPoints[jointToPredict].transform, desiredPosition, color, feetOnTheGround);
         }
     }
+
     
     public void PredictPointerForStaticFeet(int jointToAnalyze, Color color, float angleDifferenceForPrediction, GameObject[] landmarkPoints, string Direction)
     {
-        if (jointToAnalyze != null)
-        {
-            jointPointerManager.CreatePointerForStaticFeet(landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction, Direction);
-        }
+        jointPointerManager.CreatePointerForStaticFeet(jointToAnalyze, landmarkPoints[jointToAnalyze].transform, color, angleDifferenceForPrediction, Direction);
     }
 
     private float CalculateDistance(GameObject[] landmarkPoints, int jointA, int jointB)

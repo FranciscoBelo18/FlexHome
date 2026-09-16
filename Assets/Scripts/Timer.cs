@@ -11,6 +11,7 @@ public class Timer : MonoBehaviour
     private bool isPaused = false;
     private AudioSource audioSource;
     public Image PauseIcon;
+    public WriteJSONLogsToFile logger;
 
     void Start()
     {
@@ -77,7 +78,9 @@ public class Timer : MonoBehaviour
         }
         else
         {
-            ApplicationVariables.ActualState = "ExerciseDemo";
+            logger.LogEvent("Exercise Time Ended");
+            logger.ForceSave();
+            ApplicationVariables.ActualState = "ExerciseDemo";  
         }
     }
 
@@ -86,6 +89,7 @@ public class Timer : MonoBehaviour
         PauseIcon.gameObject.SetActive(true);
         timerText.gameObject.SetActive(false);
         isPaused = true;
+        logger.LogEvent("Timer Paused");
     }
 
     public void ResumeTimer()
@@ -93,6 +97,7 @@ public class Timer : MonoBehaviour
         PauseIcon.gameObject.SetActive(false);
         timerText.gameObject.SetActive(true);
         isPaused = false;
+        logger.LogEvent("Timer Resumed");
     }
 
     public void ForceEndTimer()

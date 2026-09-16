@@ -10,11 +10,13 @@ public class JointPointerManager : MonoBehaviour
     // Armazena setas ativas associadas a cada joint
     private Dictionary<Transform, GameObject> activeArrows = new Dictionary<Transform, GameObject>();
 
-    public void CreatePointer(Transform baseJoint, Vector3 targetPosition, Color color, bool feetOnTheGround)
+    public void CreatePointer(int jointToPredict, Transform baseJoint, Vector3 targetPosition, Color color, bool feetOnTheGround)
     {
         if (!createPointers) return;
 
         if (baseJoint == null) return;
+     
+        Vector3 adjustedArrowPosition = GetUpdatedPosition(baseJoint.position, jointToPredict);
 
         // Escolhe o prefab correto
         GameObject desiredPrefab = null;
@@ -46,18 +48,18 @@ public class JointPointerManager : MonoBehaviour
             if (arrow == null || !IsSamePrefab(arrow, desiredPrefab))
             {
                 Destroy(arrow);
-                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity); // não parenta
+                arrow = Instantiate(desiredPrefab, adjustedArrowPosition, Quaternion.identity); // não parenta
                 activeArrows[baseJoint] = arrow;
             }
         }
         else
         {
-            arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity); // não parenta
+            arrow = Instantiate(desiredPrefab, adjustedArrowPosition, Quaternion.identity); // não parenta
             activeArrows[baseJoint] = arrow;
         }
 
         // Atualiza posição da seta
-        arrow.transform.position = baseJoint.position;
+        arrow.transform.position = adjustedArrowPosition;
 
         // Calcula direção
         Vector3 dir;
@@ -77,8 +79,9 @@ public class JointPointerManager : MonoBehaviour
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    public void CreatePointerForStaticFeet(Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction)
+    public void CreatePointerForStaticFeet(int jointToPredict, Transform baseJoint, Color color, float angleDifferenceForPrediction, string Direction)
     {
+        Vector3 adjustedArrowPosition = GetUpdatedPosition(baseJoint.position, jointToPredict);
         if (!createPointers) return;
         
         if (baseJoint == null) return;
@@ -120,31 +123,83 @@ public class JointPointerManager : MonoBehaviour
             if (arrow == null || !IsSamePrefab(arrow, desiredPrefab))
             {
                 Destroy(arrow);
-                arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity);
+                arrow = Instantiate(desiredPrefab, adjustedArrowPosition, Quaternion.identity);
                 activeArrows[baseJoint] = arrow;
             }
         }
         else
         {
-            arrow = Instantiate(desiredPrefab, baseJoint.position, Quaternion.identity);
+            arrow = Instantiate(desiredPrefab, adjustedArrowPosition, Quaternion.identity);
             activeArrows[baseJoint] = arrow;
         }
 
-        arrow.transform.position = baseJoint.position;
-
+        arrow.transform.position = adjustedArrowPosition;
         if (Direction == "Vertical")
         {
-            float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
-            arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            if (ApplicationVariables.ActualExercise == "Knee Hug")
+            {
+                float rotationZ = angleDifferenceForPrediction > 0 ? 90f : -90f;
+                arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            }
+            else
+            {
+                float rotationZ = angleDifferenceForPrediction > 0 ? -90f : 90f;
+                arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            }
+            
         }
         else if (Direction == "Horizontal")
         {
-            float rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+            float rotationZ;
+            if (ApplicationVariables.ActualExercise == "Lateral Lunges")
+            {
+                if (ApplicationVariables.isLeftLegSide)
+                {
+                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+                }
+                else
+                {
+                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+                }  
+            }
+            else
+            {
+                if (ApplicationVariables.PlayerPosition == "Left")
+                {
+                    rotationZ = angleDifferenceForPrediction > 0 ? 180f : 0f;
+                }
+                else
+                {
+                    rotationZ = angleDifferenceForPrediction > 0 ? 0f : 180f;
+                }
+            }
+             
             arrow.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
         }
         
     }
 
+    private Vector3 GetUpdatedPosition(Vector3 originalPosition, int jointToPredict)
+    {
+        Vector3 finalPos = originalPosition;
+
+        if (ApplicationVariables.GameVersion == "Merged" && jointToPredict >= 0)
+        {
+            float deslocamento = ApplicationVariables.MergedArrowPositionDifference;
+
+            if (jointToPredict != 27 && jointToPredict != 28){
+                if (jointToPredict % 2 == 0)
+                {
+                    finalPos.x -= deslocamento;
+                }
+                else
+                {
+                    finalPos.x += deslocamento;
+                }
+            }
+        }
+        return finalPos;
+    }
 
     private bool IsSamePrefab(GameObject arrow, GameObject prefab)
     {

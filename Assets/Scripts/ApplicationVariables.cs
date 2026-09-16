@@ -16,12 +16,11 @@ public static class ApplicationVariables
     public static string ActualExercise = "";
     public static bool isAllExercisesCompleted = false;
     public static string ActualState = "ExerciseDemo";
-    public static float TimeLimitToCompleteExercise = 60;
+    public static float TimeLimitToCompleteExercise = 150;
     public static float TimeToDisplayExerciseDemo = 20;
     public static Dictionary<int, int[]> JointGroupsFromPlayfab = new Dictionary<int, int[]>();
-    public static int GoodPerformanceRange = 20;
-    public static int AveragePerformanceRange = 40;
-    public static int BadPerformanceRange = 80;
+    public static float GoodPerformanceRange = 15;
+    public static float AveragePerformanceRange = 35;
     public static int RepsCompleted = 0;
     public static int DesiredReps = 12;
     public static int LowestGoalPoints = 50;
@@ -31,15 +30,16 @@ public static class ApplicationVariables
     public static int MediumRepsGoal = 10;
     public static int maxResultsToDisplayLeaderboard = 5;
     public static bool HipOutOfRange = false;
-
-    public class ExerciseData
-    {
-        public string name;
-        public bool together;
-        public bool FeetOnTheGround;
-        public bool StaticFeet;
-    }
     public static Dictionary<string, bool> AudioSettings = new Dictionary<string, bool>();
     public static Dictionary<int, int> JointPairCorrection = new Dictionary<int, int>();
     public static Dictionary<int, Vector3> PredictedPositions = new Dictionary<int, Vector3>();
+    public static bool isLeftLegSide = false;
+    public static bool firstTimeAfterPopUpOutsideBounds = true;
+    public static bool isDemoVersion = false;
+    public static int DemoLowestRepsGoal = 1;
+    public static int DemoMediumRepsGoal = 3;
+    public static int DemoDesiredReps = 5;
+    public static bool isWaitingForBaseReturn = false;
+    public static float MergedArrowPositionDifference = 0.105f;
+    public static string PlayerPosition = "";
 }

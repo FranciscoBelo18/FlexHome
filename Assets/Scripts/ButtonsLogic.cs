@@ -13,6 +13,9 @@ public class ButtonsLogic : MonoBehaviour
     public GameObject PopUpTutorialObject;
     public GameObject loginPanel;
     public GameObject registerPanel;
+    private WriteJSONLogsToFile writeLogsToFile;
+    public GameObject toggle;
+    private int increaseValue = 5;
 
     public void PlayGame()
     {
@@ -38,6 +41,16 @@ public class ButtonsLogic : MonoBehaviour
         SceneManager.LoadScene("LoadingScene");
     }
 
+    public void QuitFromSession()
+    {
+        writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
+        writeLogsToFile.LogEvent("Left Exercise Session");
+        writeLogsToFile.ForceSave();
+        ApplicationVariables.SceneToLoad = "MainMenu";
+        ApplicationVariables.ActualState = "ExerciseDemo";
+        SceneManager.LoadScene("LoadingScene");
+    }
+
     public void SelectSimpleVersion()
     {
         ApplicationVariables.SceneToLoad = "GymScene";
@@ -53,15 +66,16 @@ public class ButtonsLogic : MonoBehaviour
     public void TypeOfExercisesSelected(GameObject clickedButton)
     {
         //Debug.Log("Tag do botao clicado: " + clickedButton.tag);
-        if (dropdown != null)
+        if (dropdown != null && toggle != null)
         {
+            Toggle toggleComponent = toggle.GetComponent<Toggle>();
             TMP_Dropdown dropdownComponent = dropdown.GetComponent<TMP_Dropdown>();
             int selectedIndex = dropdownComponent.value;
             //Debug.Log("Selected index: " + selectedIndex);  
             string version = dropdownComponent.options[selectedIndex].text;
             //Debug.Log("Selected game version: " + version);
 
-            if (version == "Standard" || version == "Dynamic")
+            if (version == "None" || version == "Standard" || version == "Dynamic" || version == "Merged")
             {
                 switch (clickedButton.tag)
                 {
@@ -69,6 +83,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "LowerBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");
@@ -77,6 +92,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "UpperBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");
@@ -85,6 +101,7 @@ public class ButtonsLogic : MonoBehaviour
                         ApplicationVariables.GameVersion = version;
                         ApplicationVariables.TypeOfExercises = "FullBody";
                         ApplicationVariables.SceneToLoad = "GymScene";
+                        ApplicationVariables.isDemoVersion = toggleComponent.isOn;
                         PopUpTutorialObject.SetActive(true);
                         Time.timeScale = 0f;
                         //SceneManager.LoadScene("LoadingScene");
@@ -159,6 +176,9 @@ public class ButtonsLogic : MonoBehaviour
 
     public void RestartLevel()
     {
+        writeLogsToFile = GameObject.Find("LogsManagerJSON").GetComponent<WriteJSONLogsToFile>();
+        writeLogsToFile.LogEvent("Level Restarted");
+        writeLogsToFile.ForceSave();
         ApplicationVariables.SceneToLoad = "GymScene";
         ApplicationVariables.ActualState = "ExerciseDemo";
         SceneManager.LoadScene("LoadingScene");
@@ -174,5 +194,17 @@ public class ButtonsLogic : MonoBehaviour
     {
         loginPanel.SetActive(false);
         registerPanel.SetActive(true);
+    }
+
+    public void IncreaseDifficulty()
+    {
+        ApplicationVariables.GoodPerformanceRange += increaseValue;
+        ApplicationVariables.AveragePerformanceRange += increaseValue;
+    }
+
+    public void DecreaseDifficulty()
+    {
+        ApplicationVariables.GoodPerformanceRange -= increaseValue;
+        ApplicationVariables.AveragePerformanceRange -= increaseValue;
     }
 }

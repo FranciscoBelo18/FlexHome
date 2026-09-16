@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
     public JointAngleCalculation jointAngleCalculation;
     private int[] activeExerciseJoints = new int[0];
     private int[] basePositionJoints = new int[0];
-    private List<ApplicationVariables.ExerciseData> selectedExercises = new List<ApplicationVariables.ExerciseData>();
+    private List<ExerciseData> selectedExercises = new List<ExerciseData>();
     public PointsSystem pointsSystem;
     public TextMeshPro totalPointsText;
     private int swapCounter = 0;
@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, int> ExerciseResults = new Dictionary<string, int>();
     public TextMeshProUGUI ExerciseResultsText;
     public TextMeshProUGUI TotalPointsText;
-    private bool isWaitingForBaseReturn = false;
     public Timer timer;
     public TextMeshProUGUI activeLegText;
     public GameObject activeLegObject;
@@ -55,7 +54,12 @@ public class GameManager : MonoBehaviour
     public TextMeshPro BoardTitle;
     public JointPointerManager jointPointerManager;
     public VideoManager videoManager;
-    public string leaderboardName;
+    private string leaderboardName;
+    public GameObject ScreenDisplay;
+    public WriteJSONLogsToFile writeJSONLogsToFile;
+    public GameObject[] goals;
+    public GameObject[] DisplayBoundaryObjects;
+    private int extraRangeForSquats = 20;
 
     void Start()
     {
@@ -63,11 +67,12 @@ public class GameManager : MonoBehaviour
         {
             InitializeGame();
         }
+        RepCompletedAudio = GetComponent<AudioSource>();
     }
 
     private void InitializeGame()
     {
-        RepCompletedAudio = GetComponent<AudioSource>();
+        //RepCompletedAudio = GetComponent<AudioSource>();
         Debug.Log("--------------------------------------------");
         Debug.Log("Type of exercises: " + ApplicationVariables.TypeOfExercises);
         Debug.Log("Game version: " + ApplicationVariables.GameVersion);
@@ -77,23 +82,24 @@ public class GameManager : MonoBehaviour
         ApplicationVariables.isAllExercisesCompleted = false;
         GetExercises();
         jointAngleCalculation.GetJointsToCalculateAngles();
-        isInitialized = true;
-        if (ApplicationVariables.GameVersion == "Dynamic")
+        InitializeGoalsBoard();
+        if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
         {
             jointPrediction.GetJointPairsToCorrectFromPlayfab();
         }
+        StartCoroutine(SendJointAngleToDB());
+        isInitialized = true;
     }
 
     void Update()
-    {
+    {   
+        AnalyzeSettings(RepCompletedAudio, backgroundAudio);
         if (!ApplicationVariables.StartWithTutorial)
         {
             if (!isInitialized)
             {
                 InitializeGame();
             }
-
-            AnalyzeSettings(RepCompletedAudio, backgroundAudio);
 
             if (totalPointsText != null)
             {
@@ -118,6 +124,12 @@ public class GameManager : MonoBehaviour
                         ApplicationVariables.RepsCompleted = 0;
                         swapCounter = 0;
                         jointPointerManager.ClearAllPointers();
+                    }
+                    else if(previousState == "ExerciseDemo" && ApplicationVariables.ActualState == "Exercise")
+                    {
+                        //writeLogsToFile.WriteSplitLineBetweenExercises();
+                        //writeLogsToFile.WriteHeaderToFile();
+                        writeJSONLogsToFile.StartNewSession();
                     }
 
                     var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
@@ -144,25 +156,37 @@ public class GameManager : MonoBehaviour
                     UserPoseDisplay.SetActive(true);
                     DemoVideoDisplay.SetActive(false);
                     StartCoroutine(CacheLandmarkPointsWhenReady());
-                    /*if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
+                    if (!AreEssentialPointsInsideRawImage(ScreenDisplay.GetComponent<RectTransform>(), landmarkPoints, uiCamera))
                     {
-                        Debug.Log("Some essential points are out of bounds of the RawImage.");
-                        PopUpWarningOutOfBounds.SetActive(true);
-                        timer.PauseTimer();
+                        if (!timer.IsTimerPaused())
+                        {
+                            Debug.Log("Some essential points are out of bounds of the RawImage.");
+                            PopUpWarningOutOfBounds.SetActive(true);
+                            timer.PauseTimer();
+                        }
                     }
                     else
                     {
                         PopUpWarningOutOfBounds.SetActive(false);
-                        timer.ResumeTimer();
-                    }*/
+                        if (timer.IsTimerPaused())
+                        {
+                            timer.ResumeTimer();
+                        }
+                    }
 
                     if (!timer.IsTimerPaused())
                     {
+                        //AnalyzeBodyPositioning();
                         AnalyzePose();
+                    }
+                    else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
+                    {
+                        jointPointerManager.ClearAllPointers();
                     }
                 }
                 if (SettingsPopUp.activeSelf)
                 {
+                    jointPointerManager.ClearAllPointers();
                     Time.timeScale = 0f;
                     SettingsButton.SetActive(false);
                     if (ApplicationVariables.ActualState == "ExerciseDemo")
@@ -186,6 +210,7 @@ public class GameManager : MonoBehaviour
             {
                 if (PopUpExercisesCompleted != null && !PopUpExercisesCompleted.activeSelf)
                 {
+                    writeJSONLogsToFile.ForceSave();
                     TimerObject.SetActive(false);
                     UserPoseDisplay.SetActive(false);
                     DemoVideoDisplay.SetActive(false);
@@ -199,6 +224,77 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void InitializeGoalsBoard()
+    {
+        if (ApplicationVariables.isDemoVersion)
+        {
+            foreach (var goal in goals)
+            {
+                if (goal.tag == "DemoGoals")
+                {
+                    goal.SetActive(true);
+                }
+                else if (goal.tag == "NormalGoals")
+                {
+                    goal.SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            foreach (var goal in goals)
+            {
+                if (goal.tag == "DemoGoals")
+                {
+                    goal.SetActive(false);
+                }
+                else if (goal.tag == "NormalGoals")
+                {
+                    goal.SetActive(true);
+                }
+            }
+        }
+    }
+
+    public IEnumerator SendJointAngleToDB()
+    {
+        while (!ApplicationVariables.isAllExercisesCompleted)
+        {
+            if (ApplicationVariables.ActualState != "Exercise" || timer.IsTimerPaused())
+            {
+                yield return new WaitForSeconds(1f);
+                continue;
+            }
+
+            Dictionary<int, JointData> jointDataDict = new Dictionary<int, JointData>();
+
+            foreach (var ExJoint in activeExerciseJoints)
+            {
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                {
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        Vector3 jointPosition = landmarkPoints[ExJoint].transform.localPosition;
+                        
+                        JointData jointData = new JointData()
+                        {
+                            jointX = jointPosition.x,
+                            jointY = jointPosition.y,
+                            actualAngle = angle,
+                            desiredAngle = angleTarget
+                        };
+
+                        jointDataDict.Add(ExJoint, jointData);
+                    }
+                }
+            }
+            writeJSONLogsToFile.LogEvent(message: "Joint Angle Data", rep: ApplicationVariables.RepsCompleted + 1, jointData: jointDataDict);
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
     public void GetExercises()
     {
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), result =>
@@ -206,7 +302,7 @@ public class GameManager : MonoBehaviour
             if (result.Data != null && result.Data.ContainsKey("Exercises"))
             {
                 string exercisesJson = result.Data["Exercises"];
-                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ApplicationVariables.ExerciseData>>>(exercisesJson);
+                var allExercises = JsonConvert.DeserializeObject<Dictionary<string, List<ExerciseData>>>(exercisesJson);
                 string selectedType = ApplicationVariables.TypeOfExercises;
 
                 if (allExercises.ContainsKey(selectedType))
@@ -246,6 +342,7 @@ public class GameManager : MonoBehaviour
         else
         {
             ApplicationVariables.isAllExercisesCompleted = true;
+            writeJSONLogsToFile.LogEvent(message: "All exercises completed");
         }
     }
 
@@ -308,6 +405,54 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AnalyzeBodyPositioning()
+    {
+        Vector3 leftboundary = Vector3.zero;
+        Vector3 rightboundary = Vector3.zero;
+        foreach (var boundary in DisplayBoundaryObjects)
+        {
+            if (boundary.name.Contains("Left"))
+            {
+                leftboundary = boundary.transform.localPosition;
+            }
+            else
+            {
+                rightboundary = boundary.transform.localPosition;
+            }
+        }
+
+        Vector3 anklePosition;
+
+        if (activeLegText.text == "Right Leg")
+        {
+            anklePosition = landmarkPoints[27].transform.localPosition;
+        }
+        else
+        {
+            anklePosition = landmarkPoints[28].transform.localPosition;
+        }
+
+        float DistanceToLeftBoundary = Mathf.Abs(anklePosition.x - leftboundary.x);
+        float DistanceToRightBoundary = Mathf.Abs(anklePosition.x - rightboundary.x);
+
+        if(DistanceToLeftBoundary >= DistanceToRightBoundary)
+        {
+            if (ApplicationVariables.PlayerPosition != "Right" && ApplicationVariables.ActualExercise == "Lunges")
+            {
+                jointPointerManager.ClearAllPointers();
+            }
+            ApplicationVariables.PlayerPosition = "Right";
+        }
+        else
+        {
+            if (ApplicationVariables.PlayerPosition != "Left" && ApplicationVariables.ActualExercise == "Lunges")
+            {
+                jointPointerManager.ClearAllPointers();
+            }
+            ApplicationVariables.PlayerPosition = "Left";
+        }
+    }
+
     public void AnalyzePose()
     {
         if (ApplicationVariables.GameVersion == "Standard")
@@ -322,24 +467,41 @@ public class GameManager : MonoBehaviour
                         float angleTarget = JointAnglePair[ExJoint];
                         float angleDiff = Mathf.Abs(angle - angleTarget);
 
-                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        if (ApplicationVariables.ActualExercise == "Squats" || ApplicationVariables.ActualExercise == "Lunges")
                         {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
-                        }
-                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            if (angleDiff <= ApplicationVariables.GoodPerformanceRange + extraRangeForSquats)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            else if (angleDiff <= ApplicationVariables.AveragePerformanceRange + extraRangeForSquats)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            }
+                            else
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                            }
                         }
                         else
                         {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
-                        }
-                    }
+                            if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            }
+                            else
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                            }
+                        }}
                 }
             }
             CheckAllJointsColor();
         }
-        else if (ApplicationVariables.GameVersion == "Dynamic")
+        else if (ApplicationVariables.GameVersion == "Dynamic" || ApplicationVariables.GameVersion == "Merged")
         {
             var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
 
@@ -354,36 +516,38 @@ public class GameManager : MonoBehaviour
                         float angleDiff = Mathf.Abs(angle - angleTarget);
                         float angleDifferenceForPrediction = angle - angleTarget;
 
-                        if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                        
+                        if (ApplicationVariables.ActualExercise == "Squats" || ApplicationVariables.ActualExercise == "Lunges") // para os joelhos nas lunges, damos um range extra como fizemos para os squats, porque eles também podem ter uma margem maior de erro
                         {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
-                        }
-                        else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
-                        }
-                        else
-                        {
-                            landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
-                        }
-
-                        /*if ((currentExerciseData.StaticFeet && ApplicationVariables.ActualExercise == "Squats") || ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
-                        {
-                            string Direction;
-                            if (ExJoint == 24 || ExJoint == 23)
+                            if (angleDiff <= ApplicationVariables.GoodPerformanceRange + extraRangeForSquats)
                             {
-                                Direction = "Vertical";
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            else if (angleDiff <= ApplicationVariables.AveragePerformanceRange + extraRangeForSquats)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
                             }
                             else
                             {
-                                Direction = "Horizontal";
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
                             }
-                            jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
                         }
                         else
                         {
-                            jointPrediction.PredictPosition(ExJoint, landmarkPoints, angleTarget, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, currentExerciseData.FeetOnTheGround);
-                        }*/
+                            if (angleDiff <= ApplicationVariables.GoodPerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            else if (angleDiff <= ApplicationVariables.AveragePerformanceRange)
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.yellow;
+                            }
+                            else
+                            {
+                                landmarkPoints[ExJoint].GetComponent<Renderer>().material.color = Color.red;
+                            }
+                        }
+
                         if (currentExerciseData.StaticFeet && ApplicationVariables.ActualExercise == "Squats")
                         {
                             string Direction;
@@ -392,9 +556,10 @@ public class GameManager : MonoBehaviour
                                 Direction = "Vertical";
                                 jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
                             }
-                        }  
+                        }
                         else if (ApplicationVariables.ActualExercise == "Lunges" || ApplicationVariables.ActualExercise == "Lateral Lunges")
                         {
+                            AnalyzeBodyPositioning();
                             string Direction;
                             if (ExJoint == 24 || ExJoint == 23)
                             {
@@ -405,6 +570,17 @@ public class GameManager : MonoBehaviour
                                 Direction = "Horizontal";
                             }
                             jointPrediction.PredictPointerForStaticFeet(ExJoint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                        }
+                        else if (!currentExerciseData.FeetOnTheGround && ApplicationVariables.ActualExercise == "Knee Hug")
+                        {
+                            Dictionary<int, int> jointsPair = ApplicationVariables.JointPairCorrection;
+                            if (jointsPair != null && jointsPair.ContainsKey(ExJoint))
+                            {
+                                int joint = jointsPair[ExJoint];
+                                string Direction = "Vertical";
+                                jointPrediction.PredictPointerForStaticFeet(joint, landmarkPoints[ExJoint].GetComponent<Renderer>().material.color, angleDifferenceForPrediction, landmarkPoints, Direction);
+                            }
+
                         }
                         else
                         {
@@ -415,14 +591,97 @@ public class GameManager : MonoBehaviour
             }
             CheckAllJointsColor();
         }
+        else if (ApplicationVariables.GameVersion == "None")
+        {
+            var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
+
+            bool allJointsAreGood = true;
+
+            foreach (var ExJoint in activeExerciseJoints)
+            {
+                foreach (var joints in ApplicationVariables.JointGroupsFromPlayfab)
+                {
+                    if (joints.Key == ExJoint)
+                    {
+                        float angle = jointAngleCalculation.CalculateAngle(joints.Value, landmarkPoints);
+                        float angleTarget = JointAnglePair[ExJoint];
+                        float angleDiff = Mathf.Abs(angle - angleTarget);
+                        float angleDifferenceForPrediction = angle - angleTarget;
+
+                        if (ApplicationVariables.ActualExercise == "Squats" || ApplicationVariables.ActualExercise == "Lunges")
+                        {
+                            if (angleDiff > ApplicationVariables.GoodPerformanceRange + extraRangeForSquats)
+                            {
+                                allJointsAreGood = false;
+                            }
+                        }
+                        else
+                        {
+                            if (angleDiff > ApplicationVariables.GoodPerformanceRange)
+                            {
+                                allJointsAreGood = false;
+                            }
+                        }   
+                    }
+                }
+            }
+            if (allJointsAreGood && !ApplicationVariables.isWaitingForBaseReturn)
+            {
+                if (currentExerciseData.together)
+                {
+                    writeJSONLogsToFile.LogEvent(message: "Reached Exercise Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                }
+                else
+                {
+                    if(activeLegText.text == "Right Leg")
+                    {
+                        writeJSONLogsToFile.LogEvent(message: "Reached Right Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                    }
+                    else
+                    {
+                        writeJSONLogsToFile.LogEvent(message: "Reached Left Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                    }
+                }
+                StartCoroutine(ExerciseRepCompleted(currentExerciseData));
+            }
+        }
     }
+
+    //para a versao sem feedback visual
+    private IEnumerator ExerciseRepCompleted(ExerciseData currentExerciseData)
+    {
+        ApplicationVariables.isWaitingForBaseReturn = true;
+        StartCoroutine(PlaySoundWithBackground());
+
+        while (!isInBasePosition())
+        {
+            yield return null;
+        }
+
+        if (currentExerciseData != null)
+        {
+            if (currentExerciseData.together)
+            {
+                pointsSystem.AddPointsRepCompleted();
+                ApplicationVariables.RepsCompleted++;
+                writeJSONLogsToFile.LogEvent(message: "Rep Completed", rep: ApplicationVariables.RepsCompleted);
+            }
+            else
+            {
+                SwapLegs();
+                ChangeActiveLegText();
+            }
+        }
+        ApplicationVariables.isWaitingForBaseReturn = false;
+    }
+
     private void CheckAllJointsColor()
     {
         bool allGreen = activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green);
 
-        if (allGreen && !isWaitingForBaseReturn)
+        if (allGreen && !ApplicationVariables.isWaitingForBaseReturn)
         {
-            isWaitingForBaseReturn = true;
+            ApplicationVariables.isWaitingForBaseReturn = true;
 
             jointPointerManager.createPointers = false;
 
@@ -434,6 +693,21 @@ public class GameManager : MonoBehaviour
 
             if (currentExerciseData != null)
             {
+                if (currentExerciseData.together)
+                {
+                    writeJSONLogsToFile.LogEvent(message: "Reached Exercise Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                }
+                else
+                {
+                    if(activeLegText.text == "Right Leg")
+                    {
+                        writeJSONLogsToFile.LogEvent(message: "Reached Right Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                    }
+                    else
+                    {
+                        writeJSONLogsToFile.LogEvent(message: "Reached Left Leg Pose", rep: ApplicationVariables.RepsCompleted + 1);
+                    }
+                }
                 StartCoroutine(CheckBasePositionCoroutine(currentExerciseData));
             }
         }
@@ -461,20 +735,42 @@ public class GameManager : MonoBehaviour
 
     private void ChangeActiveLegText()
     {
+        var currentExerciseData = selectedExercises.FirstOrDefault(e => e.name == ApplicationVariables.ActualExercise);
         if (activeLegText != null)
         {
-            activeLegText.text = activeLegText.text == "Left Leg" ? "Right Leg" : "Left Leg";
+            if (activeLegText.text == "Right Leg")
+            {
+                activeLegText.text = "Left Leg";
+                if(currentExerciseData != null && currentExerciseData.LateralFrontFacing)
+                {
+                    ApplicationVariables.isLeftLegSide = true;
+                }
+                writeJSONLogsToFile.LogEvent(message: "Switched to Left Leg", rep: ApplicationVariables.RepsCompleted + 1);
+            }
+            else
+            {
+                activeLegText.text = "Right Leg";
+                if (currentExerciseData != null && currentExerciseData.LateralFrontFacing)
+                {
+                    ApplicationVariables.isLeftLegSide = false;
+                }
+
+                if (ApplicationVariables.RepsCompleted < ApplicationVariables.DesiredReps)
+                {
+                    writeJSONLogsToFile.LogEvent(message: "Switched to Right Leg", rep: ApplicationVariables.RepsCompleted + 1);
+                }
+            }
         }
     }
 
-    private IEnumerator CheckBasePositionCoroutine(ApplicationVariables.ExerciseData currentExerciseData)
+    private IEnumerator CheckBasePositionCoroutine(ExerciseData currentExerciseData)
     {
         //para evitar que fique ali em loop no caso de o player ficar sempre na pose correta e nao ficar no loop de adiçao de pontos
         while (activeExerciseJoints.All(joint => landmarkPoints[joint].GetComponent<Renderer>().material.color == Color.green))
         {
             yield return null;
         }
-
+        
         while (!isInBasePosition())
         {
             yield return null;
@@ -484,6 +780,7 @@ public class GameManager : MonoBehaviour
         {
             pointsSystem.AddPointsRepCompleted();
             ApplicationVariables.RepsCompleted++;
+            writeJSONLogsToFile.LogEvent(message: "Rep Completed", rep: ApplicationVariables.RepsCompleted);
         }
         else
         {
@@ -491,7 +788,7 @@ public class GameManager : MonoBehaviour
             ChangeActiveLegText();
         }
 
-        isWaitingForBaseReturn = false;
+        ApplicationVariables.isWaitingForBaseReturn = false;
         jointPointerManager.createPointers = true;
     }
     
@@ -564,7 +861,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckRepsCompleted()
     {
-        if (ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps)
+        if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.DesiredReps) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoDesiredReps))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -576,7 +873,7 @@ public class GameManager : MonoBehaviour
             pointsSystem.AddPointsExerciseCompleted();
             FinishExercise();
         }
-        else if (ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal)
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.MediumRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoMediumRepsGoal))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -587,7 +884,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if (ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal)
+        else if ((ApplicationVariables.isDemoVersion == false && ApplicationVariables.RepsCompleted >= ApplicationVariables.LowestRepsGoal) || (ApplicationVariables.isDemoVersion && ApplicationVariables.RepsCompleted >= ApplicationVariables.DemoLowestRepsGoal))
         {
             foreach (GameObject line in StrikeThroughLines)
             {
@@ -602,6 +899,8 @@ public class GameManager : MonoBehaviour
 
     private void FinishExercise()
     {
+        writeJSONLogsToFile.LogEvent(message: "Exercise Completed");
+        writeJSONLogsToFile.ForceSave();
         float timeLeft = timer.GetTime();
         int timeInt = Mathf.FloorToInt(timeLeft);
         pointsSystem.AddPointsFromGoal(timeInt * 2);
@@ -719,7 +1018,19 @@ public class GameManager : MonoBehaviour
             switch (setting.Key)
             {
                 case "Background Music":
-                    background.mute = !setting.Value;
+                    if (setting.Value) 
+                    {
+                        background.mute = false;
+
+                        if (!background.isPlaying) 
+                        {
+                            background.Play();
+                        }
+                    }
+                    else 
+                    {
+                        background.mute = true;
+                    }
                     break;
                 case "Exercise Rep Completed":
                     RepCompleted.mute = !setting.Value;
